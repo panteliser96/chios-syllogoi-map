@@ -108,9 +108,18 @@ function buildClubs(rows) {
 
 const CHIOS = L.latLngBounds([38.14, 25.82], [38.61, 26.17]);
 const map = L.map('map', { maxBounds: CHIOS.pad(0.25), maxBoundsViscosity: 1, zoomSnap: 0.25 });
-map.fitBounds(CHIOS);
+map.fitBounds(CHIOS, { animate: false });
 map.setMinZoom(map.getZoom());
-window.addEventListener('resize', () => { map.setMinZoom(0); map.setMinZoom(map.getBoundsZoom(CHIOS)); });
+// Όταν αλλάζει το μέγεθος του παραθύρου, το νησί ξαναχωράει ολόκληρο (εκτός αν ο χρήστης έχει ζουμάρει)
+function refit() {
+  const atMin = map.getZoom() <= map.getMinZoom() + 0.01;
+  map.setMinZoom(0);
+  const z = map.getBoundsZoom(CHIOS);
+  if (atMin || map.getZoom() < z) map.fitBounds(CHIOS, { animate: false });
+  map.setMinZoom(z);
+}
+map.on('resize', () => setTimeout(refit, 0));
+if (window.ResizeObserver) new ResizeObserver(() => map.invalidateSize()).observe(document.getElementById('map'));
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
