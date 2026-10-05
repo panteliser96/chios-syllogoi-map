@@ -106,11 +106,21 @@ function buildClubs(rows) {
   return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'el'));
 }
 
-const map = L.map('map').setView([38.40, 26.02], 10);
+const CHIOS = L.latLngBounds([38.14, 25.82], [38.61, 26.17]);
+const map = L.map('map', { maxBounds: CHIOS.pad(0.25), maxBoundsViscosity: 1, zoomSnap: 0.25 });
+map.fitBounds(CHIOS);
+map.setMinZoom(map.getZoom());
+window.addEventListener('resize', () => { map.setMinZoom(0); map.setMinZoom(map.getBoundsZoom(CHIOS)); });
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
+// Μάσκα: καλύπτει ό,τι βρίσκεται έξω από το περίγραμμα της Χίου (chios.geojson, δεδομένα OpenStreetMap)
+fetch('chios.geojson').then(r => r.json()).then(g => {
+  const hole = g.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]);
+  L.polygon([[[20, 5], [20, 45], [55, 45], [55, 5]], hole],
+    { stroke: true, color: '#7fa9b8', weight: 1, fillColor: '#aad3df', fillOpacity: 1, interactive: false }).addTo(map);
+}).catch(() => {});
 const cluster = L.markerClusterGroup({ maxClusterRadius: 40 }).addTo(map);
 
 let clubs = [], active = new Set();
