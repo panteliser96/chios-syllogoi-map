@@ -32,6 +32,22 @@
   #list .acts li:hover, #list .acts li:focus { background: var(--accent-soft); outline: none; }
   .acts b { font-weight: 600; }
   .when { color: var(--muted); }
+  .linkbtn { font: inherit; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+  .linkbtn:hover, .linkbtn:focus-visible { text-decoration: underline; }
+  .linkbtn.club { display: block; font-size: 13px; }
+  #profile { flex: 1; overflow-y: auto; padding: 14px 16px 20px; }
+  #back { font: inherit; font-size: 13px; color: var(--accent); background: none; border: 0; padding: 4px 0; cursor: pointer; }
+  #profile h2 { font-size: 18px; margin: 10px 0 2px; }
+  #profile h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 18px 0 6px; }
+  #profile p { margin: 10px 0 0; font-size: 14px; }
+  .contact { margin: 0; padding: 0; list-style: none; font-size: 14px; }
+  .contact li { display: flex; gap: 10px; padding: 5px 0; }
+  .contact span { color: var(--muted); width: 84px; flex: none; }
+  .contact a { color: var(--accent); overflow-wrap: anywhere; }
+  #profile .acts li { padding: 6px 8px; margin: 0 -8px; border-radius: 6px; cursor: pointer; }
+  #profile .acts li:hover, #profile .acts li:focus { background: var(--accent-soft); outline: none; }
+  body.in-profile #q, body.in-profile #chips, body.in-profile #count, body.in-profile #list { display: none; }
+  body.in-profile h1 { margin-bottom: 0; }
   #map { flex: 1; min-height: 300px; }
   #msg { padding: 16px; color: #8a2b1d; font-size: 14px; }
   .leaflet-popup-content { font: 14px/1.4 system-ui, sans-serif; margin: 12px 14px; }
@@ -52,6 +68,7 @@
   </header>
   <div id="msg" hidden></div>
   <ul id="list"></ul>
+  <section id="profile" hidden aria-live="polite"></section>
 </aside>
 <div id="map"></div>
 
@@ -65,6 +82,10 @@
    Μία γραμμή ανά δραστηριότητα. Οι συντεταγμένες είναι του χώρου όπου γίνεται
    η δραστηριότητα· ίδιες συντεταγμένες = ένα σημείο στον χάρτη. */
 const DATA_URL = 'data.csv';
+/* Προφίλ συλλόγων: syllogoi.csv, μία γραμμή ανά σύλλογο.
+   Στήλες: σύλλογος, url, email, τηλέφωνο, περιγραφή (όλες προαιρετικές εκτός από το όνομα).
+   Το όνομα πρέπει να είναι γραμμένο ακριβώς όπως στο data.csv. */
+const PROFILES_URL = 'syllogoi.csv';
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // Αναζήτηση χωρίς τόνους και κεφαλαία
@@ -137,7 +158,7 @@ fetch('chios.geojson').then(r => r.json()).then(g => {
 }).catch(() => {});
 const cluster = L.markerClusterGroup({ maxClusterRadius: 40 }).addTo(map);
 
-let rows = [], active = new Set();
+let rows = [], active = new Set(), profiles = new Map(), current = null;
 const $ = id => document.getElementById(id);
 const byClub = (a, b) => a.localeCompare(b, 'el');
 const group = (list, key) => list.reduce((m, r) => (m.has(r[key]) || m.set(r[key], []), m.get(r[key]).push(r), m), new Map());
@@ -149,7 +170,7 @@ function popupHTML(list) {
   const name = placeName(list);
   let html = `<div class="name">${esc(name)}</div>` + (addr && addr !== name ? `<div class="village">${esc(addr)}</div>` : '');
   [...group(list, 'club')].sort((a, b) => byClub(a[0], b[0])).forEach(([club, acts]) => {
-    html += `<div class="club">${esc(club)}</div><ul class="acts">` +
+    html += `<button type="button" class="linkbtn club" data-club="${esc(club)}">${esc(club)}</button><ul class="acts">` +
       acts.map(r => `<li><b>${esc(r.act)}</b>${when(r)}</li>`).join('') + '</ul>';
   });
   return html;
@@ -157,7 +178,7 @@ function popupHTML(list) {
 
 function render() {
   const q = norm($('q').value);
-  const shown = rows.filter(r =>
+  const shown = current ? rows.filter(r => r.club === current) : rows.filter(r =>
     (!active.size || active.has(r.act)) &&
     (!q || [r.club, r.village, r.venue, r.address].some(v => norm(v).includes(q))));
   cluster.clearLayers();
@@ -170,28 +191,88 @@ function render() {
     cluster.addLayer(m);
   });
   const open = key => { const m = markers.get(key); cluster.zoomToShowLayer(m, () => m.openPopup()); };
+  const actItem = r => {
+    const a = document.createElement('li');
+    a.tabIndex = 0;
+    const place = [r.venue, r.address, current ? r.village : ''].filter(Boolean).join(', ');
+    a.innerHTML = `<b>${esc(r.act)}</b>${when(r)}` + (place ? `<div class="place">${esc(place)}</div>` : '');
+    a.addEventListener('click', () => open(r.key));
+    a.addEventListener('keydown', e => { if (e.key === 'Enter') open(r.key); });
+    return a;
+  };
+
+  document.body.classList.toggle('in-profile', !!current);
+  $('profile').hidden = !current;
+  if (current) { renderProfile(shown, actItem); return; }
 
   const clubs = [...group(shown, 'club')].sort((a, b) => byClub(a[0], b[0]));
   clubs.forEach(([club, acts]) => {
     const li = document.createElement('li');
     const villages = [...new Set(acts.map(r => r.village).filter(Boolean))].join(', ');
-    li.innerHTML = `<div class="name">${esc(club)}</div><div class="village">${esc(villages)}</div>`;
+    li.innerHTML = `<button type="button" class="linkbtn" data-club="${esc(club)}">${esc(club)}</button><div class="village">${esc(villages)}</div>`;
     const ul = document.createElement('ul');
     ul.className = 'acts';
-    acts.forEach(r => {
-      const a = document.createElement('li');
-      a.tabIndex = 0;
-      const place = [r.venue, r.address].filter(Boolean).join(', ');
-      a.innerHTML = `<b>${esc(r.act)}</b>${when(r)}` + (place ? `<div class="place">${esc(place)}</div>` : '');
-      a.addEventListener('click', () => open(r.key));
-      a.addEventListener('keydown', e => { if (e.key === 'Enter') open(r.key); });
-      ul.appendChild(a);
-    });
+    acts.forEach(r => ul.appendChild(actItem(r)));
     li.appendChild(ul);
     $('list').appendChild(li);
   });
   const n = clubs.length, v = markers.size;
   $('count').textContent = (n === 1 ? '1 σύλλογος' : n + ' σύλλογοι') + ' · ' + (v === 1 ? '1 χώρος' : v + ' χώροι');
+}
+
+function renderProfile(acts, actItem) {
+  const p = profiles.get(current) || {};
+  const el = $('profile');
+  // Μόνο http(s) σύνδεσμοι· ό,τι άλλο εμφανίζεται ως απλό κείμενο
+  const url = /^https?:\/\//i.test(p.url || '') ? p.url : (p.url && !/^[a-z][a-z0-9+.-]*:/i.test(p.url) ? 'https://' + p.url : '');
+  const contact = [];
+  if (url) contact.push(`<li><span>Ιστοσελίδα</span><a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(url.replace(/^https?:\/\//i, '').replace(/\/$/, ''))}</a></li>`);
+  if (p.email) contact.push(`<li><span>Email</span><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></li>`);
+  if (p.phone) contact.push(`<li><span>Τηλέφωνο</span><a href="tel:${esc(p.phone.replace(/[^+\d]/g, ''))}">${esc(p.phone)}</a></li>`);
+  const villages = [...new Set(acts.map(r => r.village).filter(Boolean))].join(', ');
+  el.innerHTML = `<button type="button" id="back">← Όλοι οι σύλλογοι</button>
+    <h2>${esc(current)}</h2><div class="village">${esc(villages)}</div>
+    ${p.about ? `<p>${esc(p.about)}</p>` : ''}
+    <h3>Επικοινωνία</h3>
+    ${contact.length ? `<ul class="contact">${contact.join('')}</ul>` : '<div class="village">Δεν έχουν καταχωριστεί στοιχεία επικοινωνίας.</div>'}
+    <h3>Δραστηριότητες</h3>`;
+  const ul = document.createElement('ul');
+  ul.className = 'acts';
+  acts.forEach(r => ul.appendChild(actItem(r)));
+  el.appendChild(ul);
+  el.scrollTop = 0;
+  $('back').addEventListener('click', () => { location.hash = ''; });
+  const b = L.latLngBounds(acts.map(r => [r.lat, r.lon]));
+  if (b.isValid()) map.fitBounds(b.pad(0.5), { maxZoom: 14 });
+}
+
+// Το προφίλ έχει δικό του σύνδεσμο (#s=όνομα), ώστε να μοιράζεται και να δουλεύει το «πίσω» του browser
+function route() {
+  let name = null;
+  try { name = decodeURIComponent((location.hash.match(/^#s=(.+)$/) || [])[1] || '') || null; } catch (e) {}
+  const was = current;
+  current = name && rows.some(r => r.club === name) ? name : null;
+  map.closePopup();
+  render();
+  if (was && !current) map.fitBounds(CHIOS);
+}
+window.addEventListener('hashchange', route);
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-club]');
+  if (b) location.hash = 's=' + encodeURIComponent(b.dataset.club);
+});
+
+function buildProfiles(table) {
+  const head = table[0].map(norm);
+  const col = name => head.indexOf(norm(name));
+  const ix = { club: col('σύλλογος'), url: col('url'), email: col('email'), phone: col('τηλέφωνο'), about: col('περιγραφή') };
+  const out = new Map();
+  if (ix.club < 0) return out;
+  table.slice(1).forEach(r => {
+    const get = k => ix[k] < 0 ? '' : (r[ix[k]] || '').trim();
+    if (get('club')) out.set(get('club'), { url: get('url'), email: get('email'), phone: get('phone'), about: get('about') });
+  });
+  return out;
 }
 
 function renderChips() {
@@ -214,7 +295,13 @@ $('q').addEventListener('input', render);
 
 fetch(DATA_URL, { cache: 'no-store' })
   .then(r => { if (!r.ok) throw new Error('Δεν βρέθηκε το αρχείο δεδομένων (' + r.status + ').'); return r.text(); })
-  .then(t => { rows = buildRows(parseCSV(t)); renderChips(); render(); })
+  .then(t => {
+    rows = buildRows(parseCSV(t));
+    // Τα προφίλ είναι προαιρετικά: αν λείπει το αρχείο, ο χάρτης δουλεύει κανονικά
+    return fetch(PROFILES_URL, { cache: 'no-store' }).then(r => r.ok ? r.text() : '').catch(() => '')
+      .then(p => { if (p.trim()) profiles = buildProfiles(parseCSV(p)); });
+  })
+  .then(() => { renderChips(); route(); })
   .catch(e => { $('msg').hidden = false; $('msg').textContent = 'Τα δεδομένα δεν φορτώθηκαν. ' + e.message; });
 </script>
 </body>
