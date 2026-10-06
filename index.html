@@ -22,12 +22,14 @@
   .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
   #count { font-size: 13px; color: var(--muted); margin-top: 10px; }
   #list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
-  #list li { padding: 12px 16px; border-bottom: 1px solid var(--line); cursor: pointer; }
-  #list li:hover, #list li:focus { background: var(--accent-soft); outline: none; }
+  #list > li { padding: 12px 16px 8px; border-bottom: 1px solid var(--line); }
   .name { font-weight: 600; }
-  .village { color: var(--muted); font-size: 13px; }
+  .village, .place { color: var(--muted); font-size: 13px; }
+  .club { font-weight: 600; font-size: 13px; margin-top: 8px; }
   .acts { margin: 6px 0 0; padding: 0; list-style: none; font-size: 13px; }
-  .acts li { padding: 2px 0; border: 0; cursor: inherit; }
+  .acts li { padding: 3px 0; }
+  #list .acts li { padding: 6px 8px; margin: 0 -8px; border-radius: 6px; cursor: pointer; }
+  #list .acts li:hover, #list .acts li:focus { background: var(--accent-soft); outline: none; }
   .acts b { font-weight: 600; }
   .when { color: var(--muted); }
   #map { flex: 1; min-height: 300px; }
@@ -44,7 +46,7 @@
 <aside>
   <header>
     <h1>Πολιτιστικοί Σύλλογοι Χίου</h1>
-    <input id="q" type="search" placeholder="Αναζήτηση συλλόγου ή χωριού" aria-label="Αναζήτηση συλλόγου ή χωριού">
+    <input id="q" type="search" placeholder="Αναζήτηση συλλόγου, χωριού ή χώρου" aria-label="Αναζήτηση συλλόγου, χωριού ή χώρου">
     <div id="chips" role="group" aria-label="Φίλτρο ανά δραστηριότητα"></div>
     <div id="count"></div>
   </header>
@@ -59,8 +61,9 @@
 /* ---------- ΡΥΘΜΙΣΗ ----------
    Πηγή δεδομένων: το data.csv δίπλα στη σελίδα, ή ο σύνδεσμος CSV ενός
    δημοσιευμένου Google Sheet (File > Share > Publish to web > CSV).
-   Στήλες: σύλλογος, χωριό, lat, lon, δραστηριότητα, μέρες, ώρες
-   Μία γραμμή ανά δραστηριότητα. */
+   Στήλες: σύλλογος, χώρος, διεύθυνση, χωριό, lat, lon, δραστηριότητα, μέρες, ώρες
+   Μία γραμμή ανά δραστηριότητα. Οι συντεταγμένες είναι του χώρου όπου γίνεται
+   η δραστηριότητα· ίδιες συντεταγμένες = ένα σημείο στον χάρτη. */
 const DATA_URL = 'data.csv';
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -86,24 +89,26 @@ function parseCSV(text) {
   return rows.filter(r => r.some(v => v.trim() !== ''));
 }
 
-function buildClubs(rows) {
+function buildRows(rows) {
   const head = rows[0].map(norm);
   const col = name => head.indexOf(norm(name));
-  const ix = { name: col('σύλλογος'), village: col('χωριό'), lat: col('lat'), lon: col('lon'),
-               act: col('δραστηριότητα'), days: col('μέρες'), hours: col('ώρες') };
-  const missing = Object.entries(ix).filter(([, i]) => i < 0).map(([k]) => k);
+  const ix = { club: col('σύλλογος'), venue: col('χώρος'), address: col('διεύθυνση'), village: col('χωριό'),
+               lat: col('lat'), lon: col('lon'), act: col('δραστηριότητα'), days: col('μέρες'), hours: col('ώρες') };
+  const optional = ['venue', 'address'];
+  const missing = Object.entries(ix).filter(([k, i]) => i < 0 && !optional.includes(k)).map(([k]) => k);
   if (missing.length) throw new Error('Λείπουν στήλες από το αρχείο δεδομένων: ' + missing.join(', '));
   const num = v => parseFloat(String(v).replace(',', '.'));
-  const map = new Map();
+  const out = [];
   rows.slice(1).forEach(r => {
-    const get = k => (r[ix[k]] || '').trim();
-    const name = get('name'), lat = num(get('lat')), lon = num(get('lon'));
-    if (!name || !isFinite(lat) || !isFinite(lon)) return;
-    const key = name + '|' + get('village');
-    if (!map.has(key)) map.set(key, { name, village: get('village'), lat, lon, acts: [] });
-    if (get('act')) map.get(key).acts.push({ act: get('act'), days: get('days'), hours: get('hours') });
+    const get = k => ix[k] < 0 ? '' : (r[ix[k]] || '').trim();
+    const o = { lat: num(get('lat')), lon: num(get('lon')) };
+    ['club', 'venue', 'address', 'village', 'act', 'days', 'hours'].forEach(k => o[k] = get(k));
+    if (!o.club || !isFinite(o.lat) || !isFinite(o.lon)) return;
+    // Ίδιες συντεταγμένες = ίδιος χώρος, άρα ένα σημείο στον χάρτη
+    o.key = o.lat.toFixed(5) + ',' + o.lon.toFixed(5);
+    out.push(o);
   });
-  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name, 'el'));
+  return out;
 }
 
 const CHIOS = L.latLngBounds([38.14, 25.82], [38.61, 26.17]);
@@ -132,37 +137,65 @@ fetch('chios.geojson').then(r => r.json()).then(g => {
 }).catch(() => {});
 const cluster = L.markerClusterGroup({ maxClusterRadius: 40 }).addTo(map);
 
-let clubs = [], active = new Set();
+let rows = [], active = new Set();
 const $ = id => document.getElementById(id);
+const byClub = (a, b) => a.localeCompare(b, 'el');
+const group = (list, key) => list.reduce((m, r) => (m.has(r[key]) || m.set(r[key], []), m.get(r[key]).push(r), m), new Map());
+const when = r => r.days || r.hours ? ` <span class="when">· ${esc([r.days, r.hours].filter(Boolean).join(', '))}</span>` : '';
+const placeName = list => (list.find(r => r.venue) || {}).venue || list[0].village;
 
-const actsHTML = c => '<ul class="acts">' + c.acts.map(a =>
-  `<li><b>${esc(a.act)}</b>${a.days || a.hours ? ` <span class="when">· ${esc([a.days, a.hours].filter(Boolean).join(', '))}</span>` : ''}</li>`
-).join('') + '</ul>';
+function popupHTML(list) {
+  const addr = [(list.find(r => r.address) || {}).address, list[0].village].filter(Boolean).join(', ');
+  const name = placeName(list);
+  let html = `<div class="name">${esc(name)}</div>` + (addr && addr !== name ? `<div class="village">${esc(addr)}</div>` : '');
+  [...group(list, 'club')].sort((a, b) => byClub(a[0], b[0])).forEach(([club, acts]) => {
+    html += `<div class="club">${esc(club)}</div><ul class="acts">` +
+      acts.map(r => `<li><b>${esc(r.act)}</b>${when(r)}</li>`).join('') + '</ul>';
+  });
+  return html;
+}
 
 function render() {
   const q = norm($('q').value);
-  const shown = clubs.filter(c =>
-    (!q || norm(c.name).includes(q) || norm(c.village).includes(q)) &&
-    (!active.size || c.acts.some(a => active.has(a.act))));
+  const shown = rows.filter(r =>
+    (!active.size || active.has(r.act)) &&
+    (!q || [r.club, r.village, r.venue, r.address].some(v => norm(v).includes(q))));
   cluster.clearLayers();
   $('list').innerHTML = '';
-  shown.forEach(c => {
-    const html = `<div class="name">${esc(c.name)}</div><div class="village">${esc(c.village)}</div>${actsHTML(c)}`;
-    const m = L.marker([c.lat, c.lon], { title: c.name }).bindPopup(html);
+
+  const markers = new Map();
+  group(shown, 'key').forEach((list, key) => {
+    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list));
+    markers.set(key, m);
     cluster.addLayer(m);
+  });
+  const open = key => { const m = markers.get(key); cluster.zoomToShowLayer(m, () => m.openPopup()); };
+
+  const clubs = [...group(shown, 'club')].sort((a, b) => byClub(a[0], b[0]));
+  clubs.forEach(([club, acts]) => {
     const li = document.createElement('li');
-    li.tabIndex = 0;
-    li.innerHTML = html;
-    const open = () => cluster.zoomToShowLayer(m, () => m.openPopup());
-    li.addEventListener('click', open);
-    li.addEventListener('keydown', e => { if (e.key === 'Enter') open(); });
+    const villages = [...new Set(acts.map(r => r.village).filter(Boolean))].join(', ');
+    li.innerHTML = `<div class="name">${esc(club)}</div><div class="village">${esc(villages)}</div>`;
+    const ul = document.createElement('ul');
+    ul.className = 'acts';
+    acts.forEach(r => {
+      const a = document.createElement('li');
+      a.tabIndex = 0;
+      const place = [r.venue, r.address].filter(Boolean).join(', ');
+      a.innerHTML = `<b>${esc(r.act)}</b>${when(r)}` + (place ? `<div class="place">${esc(place)}</div>` : '');
+      a.addEventListener('click', () => open(r.key));
+      a.addEventListener('keydown', e => { if (e.key === 'Enter') open(r.key); });
+      ul.appendChild(a);
+    });
+    li.appendChild(ul);
     $('list').appendChild(li);
   });
-  $('count').textContent = shown.length === 1 ? '1 σύλλογος' : shown.length + ' σύλλογοι';
+  const n = clubs.length, v = markers.size;
+  $('count').textContent = (n === 1 ? '1 σύλλογος' : n + ' σύλλογοι') + ' · ' + (v === 1 ? '1 χώρος' : v + ' χώροι');
 }
 
 function renderChips() {
-  const acts = [...new Set(clubs.flatMap(c => c.acts.map(a => a.act)))].sort((a, b) => a.localeCompare(b, 'el'));
+  const acts = [...new Set(rows.map(r => r.act).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'el'));
   $('chips').innerHTML = '';
   acts.forEach(a => {
     const b = document.createElement('button');
@@ -181,7 +214,7 @@ $('q').addEventListener('input', render);
 
 fetch(DATA_URL, { cache: 'no-store' })
   .then(r => { if (!r.ok) throw new Error('Δεν βρέθηκε το αρχείο δεδομένων (' + r.status + ').'); return r.text(); })
-  .then(t => { clubs = buildClubs(parseCSV(t)); renderChips(); render(); })
+  .then(t => { rows = buildRows(parseCSV(t)); renderChips(); render(); })
   .catch(e => { $('msg').hidden = false; $('msg').textContent = 'Τα δεδομένα δεν φορτώθηκαν. ' + e.message; });
 </script>
 </body>
