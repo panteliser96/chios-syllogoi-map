@@ -140,7 +140,7 @@
    η δραστηριότητα· ίδιες συντεταγμένες = ένα σημείο στον χάρτη. */
 const DATA_URL = 'data.csv';
 /* Προφίλ συλλόγων: syllogoi.csv, μία γραμμή ανά σύλλογο.
-   Στήλες: σύλλογος, url, email, τηλέφωνο, περιγραφή (όλες προαιρετικές εκτός από το όνομα).
+   Στήλες: σύλλογος, url, social, email, τηλέφωνο, περιγραφή (όλες προαιρετικές εκτός από το όνομα).
    Το όνομα πρέπει να είναι γραμμένο ακριβώς όπως στο data.csv. */
 const PROFILES_URL = 'syllogoi.csv';
 const CONTACT_EMAIL = 'homericcode@gmail.com';
@@ -225,6 +225,7 @@ const icon = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const ICONS = {
   pin: '<path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
   web: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.600 3.800 9s-1.300 6.400-3.800 9c-2.500-2.600-3.800-5.600-3.800-9S9.500 5.600 12 3z"/>',
+  social: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.800-4M8.600 13.500l6.800 4"/>',
   mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.500 7 8.500 6 8.500-6"/>',
   phone: '<path d="M5 4h3.500l1.700 4.300-2.200 1.400a11 11 0 0 0 6.300 6.300l1.400-2.200L20 15.500V19a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>'
 };
@@ -295,10 +296,19 @@ function renderProfile(acts, actItem) {
   const p = profiles.get(current) || {};
   const el = $('profile');
   // Μόνο http(s) σύνδεσμοι· ό,τι άλλο εμφανίζεται ως απλό κείμενο
-  const url = /^https?:\/\//i.test(p.url || '') ? p.url : (p.url && !/^[a-z][a-z0-9+.-]*:/i.test(p.url) ? 'https://' + p.url : '');
+  const link = u => /^https?:\/\//i.test(u || '') ? u : (u && !/^[a-z][a-z0-9+.-]*:/i.test(u) ? 'https://' + u : '');
+  const short = u => u.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
+  const url = link(p.url);
+  // Η στήλη social δέχεται έναν ή περισσότερους συνδέσμους, χωρισμένους με κενό ή ;
+  const NETWORKS = [['facebook.com', 'Facebook'], ['fb.com', 'Facebook'], ['instagram.com', 'Instagram'], ['youtube.com', 'YouTube'], ['youtu.be', 'YouTube'], ['tiktok.com', 'TikTok'], ['x.com', 'X'], ['twitter.com', 'X']];
+  const socials = (p.social || '').split(/[\s;]+/).map(link).filter(Boolean);
   const contact = [];
   const row = (href, ic, label, text, ext) => `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''}>${icon(ICONS[ic])}<span><small>${label}</small><b>${esc(text)}</b></span></a></li>`;
-  if (url) contact.push(row(url, 'web', 'Ιστοσελίδα', url.replace(/^https?:\/\//i, '').replace(/\/$/, ''), true));
+  if (url) contact.push(row(url, 'web', 'Ιστοσελίδα', short(url), true));
+  socials.forEach(u => {
+    const net = NETWORKS.find(([host]) => new RegExp('(^|\\.)' + host.replace('.', '\\.') + '$', 'i').test(short(u).split('/')[0]));
+    contact.push(row(u, 'social', net ? net[1] : 'Social media', short(u), true));
+  });
   if (p.email) contact.push(row('mailto:' + p.email, 'mail', 'Email', p.email));
   if (p.phone) contact.push(row('tel:' + p.phone.replace(/[^+\d]/g, ''), 'phone', 'Τηλέφωνο', p.phone));
   const villages = [...new Set(acts.map(r => r.village).filter(Boolean))].join(', ');
@@ -336,12 +346,12 @@ document.addEventListener('click', e => {
 function buildProfiles(table) {
   const head = table[0].map(norm);
   const col = name => head.indexOf(norm(name));
-  const ix = { club: col('σύλλογος'), url: col('url'), email: col('email'), phone: col('τηλέφωνο'), about: col('περιγραφή') };
+  const ix = { club: col('σύλλογος'), url: col('url'), social: col('social'), email: col('email'), phone: col('τηλέφωνο'), about: col('περιγραφή') };
   const out = new Map();
   if (ix.club < 0) return out;
   table.slice(1).forEach(r => {
     const get = k => ix[k] < 0 ? '' : (r[ix[k]] || '').trim();
-    if (get('club')) out.set(get('club'), { url: get('url'), email: get('email'), phone: get('phone'), about: get('about') });
+    if (get('club')) out.set(get('club'), { url: get('url'), social: get('social'), email: get('email'), phone: get('phone'), about: get('about') });
   });
   return out;
 }
@@ -371,7 +381,8 @@ const ADD_BODY = `Καλησπέρα,
 
 ΣΤΟΙΧΕΙΑ ΣΥΛΛΟΓΟΥ
 Επωνυμία:
-Ιστοσελίδα ή social media:
+Ιστοσελίδα:
+Social media (Facebook, Instagram κ.λπ.):
 Email επικοινωνίας:
 Τηλέφωνο επικοινωνίας:
 Σύντομη περιγραφή (προαιρετικά):
