@@ -49,7 +49,9 @@
   .acts li { padding: 3px 0; }
   .acts b { font-weight: 700; }
   .when { color: var(--muted); }
-  .section { display: inline-block; font-size: 12px; font-weight: 600; line-height: 1.5; padding: 0 7px; border-radius: 999px; background: var(--side); border: 1px solid var(--line); vertical-align: 1px; }
+  .section { display: inline-block; font-size: 12px; font-weight: 600; line-height: 1.5; padding: 0 7px; border-radius: 999px; background: var(--side); border: 1px solid var(--line); vertical-align: 1px; margin-right: 6px; }
+  .sess { margin-top: 3px; }
+  aside .acts li > div { flex: 1; min-width: 0; }
   aside .acts { margin: 10px -8px 0; padding-top: 6px; border-top: 1px solid var(--line); }
   aside .acts li { display: flex; gap: 10px; padding: 8px; border-radius: 10px; cursor: pointer; transition: background .15s; }
   aside .acts li .dot { margin-top: 6px; }
@@ -251,7 +253,11 @@ const $ = id => document.getElementById(id);
 const byClub = (a, b) => a.localeCompare(b, 'el');
 const group = (list, key) => list.reduce((m, r) => (m.has(r[key]) || m.set(r[key], []), m.get(r[key]).push(r), m), new Map());
 const when = r => r.days || r.hours ? ` <span class="when">· ${esc([r.days, r.hours].filter(Boolean).join(', '))}</span>` : '';
-const section = r => r.section ? ` <span class="section">${esc(r.section)}</span>` : '';
+const section = r => r.section ? `<span class="section">${esc(r.section)}</span>` : '';
+// Ίδια δραστηριότητα στον ίδιο χώρο = μία εγγραφή, με τα τμήματά της από κάτω
+const groupActs = list => [...list.reduce((m, r) => { const k = r.act + '|' + r.key; (m.get(k) || m.set(k, []).get(k)).push(r); return m; }, new Map()).values()];
+const sessions = (g, withLead) => g.map(r => `<div class="sess">${section(r)}<span class="when">${esc([r.days, r.hours].filter(Boolean).join(', '))}</span>` +
+  (withLead && r.lead ? `<span class="when"> · ${esc(r.lead)}</span>` : '') + '</div>').join('');
 const placeName = list => (list.find(r => r.venue) || {}).venue || list[0].village;
 
 function popupHTML(list) {
@@ -260,7 +266,7 @@ function popupHTML(list) {
   let html = `<div class="name">${esc(name)}</div>` + (addr && addr !== name ? `<div class="village">${esc(addr)}</div>` : '');
   [...group(list, 'club')].sort((a, b) => byClub(a[0], b[0])).forEach(([club, acts]) => {
     html += `<button type="button" class="linkbtn club" data-club="${esc(club)}">${esc(club)}</button><ul class="acts">` +
-      acts.map(r => `<li><b>${esc(r.act)}</b>${section(r)}${when(r)}</li>`).join('') + '</ul>';
+      groupActs(acts).map(g => `<li><b>${esc(g[0].act)}</b>${sessions(g, false)}</li>`).join('') + '</ul>';
   });
   return html;
 }
@@ -280,12 +286,12 @@ function render() {
     cluster.addLayer(m);
   });
   const open = key => { const m = markers.get(key); cluster.zoomToShowLayer(m, () => m.openPopup()); };
-  const actItem = r => {
+  const actItem = g => {
+    const r = g[0];
     const a = document.createElement('li');
     a.tabIndex = 0;
     const place = [r.venue, r.address, current ? r.village : ''].filter(Boolean).join(', ');
-    a.innerHTML = `${dot(r.act)}<div><b>${esc(r.act)}</b>${section(r)}${when(r)}` + (place ? `<div class="place">${esc(place)}</div>` : '') +
-      (r.lead ? `<div class="place">Υπεύθυνος/η: ${esc(r.lead)}</div>` : '') + '</div>';
+    a.innerHTML = `${dot(r.act)}<div><b>${esc(r.act)}</b>${sessions(g, true)}` + (place ? `<div class="place">${esc(place)}</div>` : '') + '</div>';
     a.addEventListener('click', () => open(r.key));
     a.addEventListener('keydown', e => { if (e.key === 'Enter') open(r.key); });
     return a;
@@ -302,7 +308,7 @@ function render() {
     li.innerHTML = `<div class="chead">${avatar(club)}<div class="cmain"><button type="button" class="linkbtn" data-club="${esc(club)}"><span>${esc(club)}</span></button>${pinLine(villages)}</div></div>`;
     const ul = document.createElement('ul');
     ul.className = 'acts';
-    acts.forEach(r => ul.appendChild(actItem(r)));
+    groupActs(acts).forEach(g => ul.appendChild(actItem(g)));
     li.appendChild(ul);
     $('list').appendChild(li);
   });
@@ -338,7 +344,7 @@ function renderProfile(acts, actItem) {
     <div class="pcard" id="pacts"><h3>Δραστηριότητες</h3></div>`;
   const ul = document.createElement('ul');
   ul.className = 'acts';
-  acts.forEach(r => ul.appendChild(actItem(r)));
+  groupActs(acts).forEach(g => ul.appendChild(actItem(g)));
   $('pacts').appendChild(ul);
   el.scrollTop = 0;
   $('back').addEventListener('click', () => { location.hash = ''; });
