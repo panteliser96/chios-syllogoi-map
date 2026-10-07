@@ -49,6 +49,7 @@
   .acts li { padding: 3px 0; }
   .acts b { font-weight: 700; }
   .when { color: var(--muted); }
+  .section { display: inline-block; font-size: 12px; font-weight: 600; line-height: 1.5; padding: 0 7px; border-radius: 999px; background: var(--side); border: 1px solid var(--line); vertical-align: 1px; }
   aside .acts { margin: 10px -8px 0; padding-top: 6px; border-top: 1px solid var(--line); }
   aside .acts li { display: flex; gap: 10px; padding: 8px; border-radius: 10px; cursor: pointer; transition: background .15s; }
   aside .acts li .dot { margin-top: 6px; }
@@ -71,7 +72,7 @@
   .pcard { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; margin-top: 12px; }
   #profile h2 { font-size: 19px; line-height: 1.25; font-weight: 800; letter-spacing: -.01em; margin: 0; }
   #profile h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 8px; }
-  #profile p { margin: 12px 0 0; font-size: 14px; }
+  #profile p { margin: 12px 0 0; font-size: 14px; white-space: pre-line; }
   .contact { margin: 0 -8px -6px; padding: 0; list-style: none; font-size: 14px; }
   .contact a { display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 10px; color: var(--ink); text-decoration: none; transition: background .15s; }
   .contact a:hover, .contact a:focus-visible { background: var(--accent-soft); outline: none; }
@@ -140,7 +141,8 @@
 /* ---------- ΡΥΘΜΙΣΗ ----------
    Πηγή δεδομένων: το data.csv δίπλα στη σελίδα, ή ο σύνδεσμος CSV ενός
    δημοσιευμένου Google Sheet (File > Share > Publish to web > CSV).
-   Στήλες: σύλλογος, χώρος, διεύθυνση, χωριό, lat, lon, δραστηριότητα, μέρες, ώρες
+   Στήλες: σύλλογος, χώρος, διεύθυνση, χωριό, lat, lon, δραστηριότητα, τμήμα, υπεύθυνος, μέρες, ώρες
+   (χώρος, διεύθυνση, τμήμα και υπεύθυνος είναι προαιρετικά)
    Μία γραμμή ανά δραστηριότητα. Οι συντεταγμένες είναι του χώρου όπου γίνεται
    η δραστηριότητα· ίδιες συντεταγμένες = ένα σημείο στον χάρτη. */
 const DATA_URL = 'data.csv';
@@ -178,8 +180,8 @@ function buildRows(rows) {
   const head = rows[0].map(norm);
   const col = name => head.indexOf(norm(name));
   const ix = { club: col('σύλλογος'), venue: col('χώρος'), address: col('διεύθυνση'), village: col('χωριό'),
-               lat: col('lat'), lon: col('lon'), act: col('δραστηριότητα'), days: col('μέρες'), hours: col('ώρες') };
-  const optional = ['venue', 'address'];
+               lat: col('lat'), lon: col('lon'), act: col('δραστηριότητα'), section: col('τμήμα'), lead: col('υπεύθυνος'), days: col('μέρες'), hours: col('ώρες') };
+  const optional = ['venue', 'address', 'section', 'lead'];
   const missing = Object.entries(ix).filter(([k, i]) => i < 0 && !optional.includes(k)).map(([k]) => k);
   if (missing.length) throw new Error('Λείπουν στήλες από το αρχείο δεδομένων: ' + missing.join(', '));
   const num = v => parseFloat(String(v).replace(',', '.'));
@@ -187,7 +189,7 @@ function buildRows(rows) {
   rows.slice(1).forEach(r => {
     const get = k => ix[k] < 0 ? '' : (r[ix[k]] || '').trim();
     const o = { lat: num(get('lat')), lon: num(get('lon')) };
-    ['club', 'venue', 'address', 'village', 'act', 'days', 'hours'].forEach(k => o[k] = get(k));
+    ['club', 'venue', 'address', 'village', 'act', 'section', 'lead', 'days', 'hours'].forEach(k => o[k] = get(k));
     if (!o.club || !isFinite(o.lat) || !isFinite(o.lon)) return;
     // Ίδιες συντεταγμένες = ίδιος χώρος, άρα ένα σημείο στον χάρτη
     o.key = o.lat.toFixed(5) + ',' + o.lon.toFixed(5);
@@ -249,6 +251,7 @@ const $ = id => document.getElementById(id);
 const byClub = (a, b) => a.localeCompare(b, 'el');
 const group = (list, key) => list.reduce((m, r) => (m.has(r[key]) || m.set(r[key], []), m.get(r[key]).push(r), m), new Map());
 const when = r => r.days || r.hours ? ` <span class="when">· ${esc([r.days, r.hours].filter(Boolean).join(', '))}</span>` : '';
+const section = r => r.section ? ` <span class="section">${esc(r.section)}</span>` : '';
 const placeName = list => (list.find(r => r.venue) || {}).venue || list[0].village;
 
 function popupHTML(list) {
@@ -257,7 +260,7 @@ function popupHTML(list) {
   let html = `<div class="name">${esc(name)}</div>` + (addr && addr !== name ? `<div class="village">${esc(addr)}</div>` : '');
   [...group(list, 'club')].sort((a, b) => byClub(a[0], b[0])).forEach(([club, acts]) => {
     html += `<button type="button" class="linkbtn club" data-club="${esc(club)}">${esc(club)}</button><ul class="acts">` +
-      acts.map(r => `<li><b>${esc(r.act)}</b>${when(r)}</li>`).join('') + '</ul>';
+      acts.map(r => `<li><b>${esc(r.act)}</b>${section(r)}${when(r)}</li>`).join('') + '</ul>';
   });
   return html;
 }
@@ -272,7 +275,7 @@ function render() {
 
   const markers = new Map();
   group(shown, 'key').forEach((list, key) => {
-    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list));
+    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list), { maxHeight: 320, minWidth: 240 });
     markers.set(key, m);
     cluster.addLayer(m);
   });
@@ -281,7 +284,8 @@ function render() {
     const a = document.createElement('li');
     a.tabIndex = 0;
     const place = [r.venue, r.address, current ? r.village : ''].filter(Boolean).join(', ');
-    a.innerHTML = `${dot(r.act)}<div><b>${esc(r.act)}</b>${when(r)}` + (place ? `<div class="place">${esc(place)}</div>` : '') + '</div>';
+    a.innerHTML = `${dot(r.act)}<div><b>${esc(r.act)}</b>${section(r)}${when(r)}` + (place ? `<div class="place">${esc(place)}</div>` : '') +
+      (r.lead ? `<div class="place">Υπεύθυνος/η: ${esc(r.lead)}</div>` : '') + '</div>';
     a.addEventListener('click', () => open(r.key));
     a.addEventListener('keydown', e => { if (e.key === 'Enter') open(r.key); });
     return a;
