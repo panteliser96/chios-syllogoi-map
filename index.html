@@ -95,6 +95,9 @@
   #map { flex: 1; min-height: 300px; }
   #msg { padding: 16px 18px; color: #8a2b1d; font-size: 14px; }
   .leaflet-container { font-family: inherit; }
+  .leaflet-touch .leaflet-bar a, .leaflet-bar a { width: 26px; height: 26px; line-height: 26px; font-size: 16px; }
+  .leaflet-touch .leaflet-bar, .leaflet-bar { border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow); overflow: hidden; }
+  .leaflet-touch .leaflet-bar a:first-child, .leaflet-touch .leaflet-bar a:last-child { border-radius: 0; }
   .leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 6px 28px rgba(20,35,45,.2); }
   .leaflet-popup-content { font-size: 14px; line-height: 1.4; margin: 14px 16px; }
   @media (max-width: 760px) {
