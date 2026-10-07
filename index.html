@@ -107,6 +107,7 @@
     header { padding: 14px 14px 12px; }
     .brand { margin-bottom: 12px; }
     footer { padding: 8px 14px; }
+    .leaflet-control-zoom { display: none; }
     footer .cta, footer > div:first-of-type { display: none; }
     #chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -14px; padding-right: 14px; scrollbar-width: none; }
     .chip { flex: none; }
@@ -204,7 +205,10 @@ function buildRows(rows) {
 }
 
 const CHIOS = L.latLngBounds([38.14, 25.82], [38.61, 26.17]);
-const map = L.map('map', { maxBounds: CHIOS.pad(0.25), maxBoundsViscosity: 1, zoomSnap: 0.25 });
+const map = L.map('map', { maxBounds: CHIOS.pad(0.8), maxBoundsViscosity: 1, zoomSnap: 0.25, zoomControl: false });
+// Τα κουμπιά ζουμ κάτω δεξιά: οι καρτέλες ανοίγουν προς τα πάνω, οπότε δεν πέφτουν πάνω τους
+map.attributionControl.setPrefix(false);
+L.control.zoom({ position: 'bottomright', zoomInTitle: 'Μεγέθυνση', zoomOutTitle: 'Σμίκρυνση' }).addTo(map);
 map.fitBounds(CHIOS, { animate: false });
 map.setMinZoom(map.getZoom());
 // Όταν αλλάζει το μέγεθος του παραθύρου, το νησί ξαναχωράει ολόκληρο (εκτός αν ο χρήστης έχει ζουμάρει)
@@ -286,7 +290,7 @@ function render() {
   const popupMax = Math.max(110, Math.min(320, map.getSize().y - 130));
   const markers = new Map();
   group(shown, 'key').forEach((list, key) => {
-    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list), { maxHeight: popupMax, minWidth: 220, maxWidth: Math.min(300, map.getSize().x - 50), autoPanPadding: [12, 12] });
+    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list), { maxHeight: popupMax, minWidth: 200, maxWidth: Math.min(300, map.getSize().x - 84), autoPanPadding: [12, 12] });
     markers.set(key, m);
     cluster.addLayer(m);
   });
