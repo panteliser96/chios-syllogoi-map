@@ -224,7 +224,7 @@ fetch('chios.geojson').then(r => r.json()).then(g => {
   L.polygon([[[20, 5], [20, 45], [55, 45], [55, 5]], hole],
     { stroke: true, color: '#7fa9b8', weight: 1, fillColor: '#aad3df', fillOpacity: 1, interactive: false }).addTo(map);
 }).catch(() => {});
-const cluster = L.markerClusterGroup({ maxClusterRadius: 40 }).addTo(map);
+const cluster = L.markerClusterGroup({ maxClusterRadius: 40, removeOutsideVisibleBounds: false }).addTo(map);
 
 let rows = [], active = new Set(), profiles = new Map(), current = null;
 // Ένα χρώμα ανά δραστηριότητα, ίδιο στα φίλτρα και στις λίστες
@@ -279,9 +279,11 @@ function render() {
   cluster.clearLayers();
   $('list').innerHTML = '';
 
+  // Η καρτέλα πρέπει να χωράει στον χάρτη μαζί με την πινέζα (σε κινητό ο χάρτης είναι χαμηλός)
+  const popupMax = Math.max(110, Math.min(320, map.getSize().y - 130));
   const markers = new Map();
   group(shown, 'key').forEach((list, key) => {
-    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list), { maxHeight: 320, minWidth: 240 });
+    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list), { maxHeight: popupMax, minWidth: 220, maxWidth: Math.min(300, map.getSize().x - 50), autoPanPadding: [12, 12] });
     markers.set(key, m);
     cluster.addLayer(m);
   });
