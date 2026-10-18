@@ -209,8 +209,8 @@ function buildRows(rows) {
     const o = { lat: num(get('lat')), lon: num(get('lon')) };
     ['club', 'venue', 'address', 'village', 'act', 'section', 'lead', 'days', 'hours'].forEach(k => o[k] = get(k));
     if (!o.club || !isFinite(o.lat) || !isFinite(o.lon)) return;
-    // Ίδιες συντεταγμένες = ίδιος χώρος, άρα ένα σημείο στον χάρτη
-    o.key = o.lat.toFixed(5) + ',' + o.lon.toFixed(5);
+    // Ίδιες συντεταγμένες και ίδιο όνομα χώρου = ένα σημείο στον χάρτη
+    o.key = o.lat.toFixed(5) + ',' + o.lon.toFixed(5) + '|' + o.venue;
     out.push(o);
   });
   return out;
