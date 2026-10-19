@@ -132,6 +132,8 @@
   #map { flex: 1; min-height: 300px; }
   #msg { padding: 16px 18px; color: #8a2b1d; font-size: 14px; }
   .leaflet-container { font-family: inherit; }
+  .mcluster { display: grid; place-items: center; border-radius: 50%; background: rgba(11,110,143,.25); }
+  .mcluster span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 13px; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
   .leaflet-touch .leaflet-bar a, .leaflet-bar a { width: 26px; height: 26px; line-height: 26px; font-size: 16px; }
   .leaflet-touch .leaflet-bar, .leaflet-bar { border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow); overflow: hidden; }
   .leaflet-touch .leaflet-bar a:first-child, .leaflet-touch .leaflet-bar a:last-child { border-radius: 0; }
@@ -320,7 +322,11 @@ fetch('chios.geojson').then(r => r.json()).then(g => {
   L.polygon([[[20, 5], [20, 45], [55, 45], [55, 5]], hole],
     { stroke: true, color: '#7fa9b8', weight: 1, fillColor: '#aad3df', fillOpacity: 1, interactive: false }).addTo(map);
 }).catch(() => {});
-const cluster = L.markerClusterGroup({ maxClusterRadius: 40, removeOutsideVisibleBounds: false }).addTo(map);
+// Ομάδες πινεζών: κύκλος στο χρώμα του site με τον αριθμό των χώρων
+const cluster = L.markerClusterGroup({
+  maxClusterRadius: 30, removeOutsideVisibleBounds: false, showCoverageOnHover: false,
+  iconCreateFunction: c => L.divIcon({ html: `<span>${c.getChildCount()}</span>`, className: 'mcluster', iconSize: [34, 34] })
+}).addTo(map);
 
 let rows = [], active = new Set(), profiles = new Map(), current = null, view = 'map', from = 'map';
 // Ένα χρώμα ανά δραστηριότητα, ίδιο στα φίλτρα και στις λίστες
@@ -378,8 +384,20 @@ function render() {
   // Η καρτέλα πρέπει να χωράει στον χάρτη μαζί με την πινέζα (σε κινητό ο χάρτης είναι χαμηλός)
   const popupMax = Math.max(110, Math.min(320, map.getSize().y - 130));
   const markers = new Map();
+  // Διαφορετικοί χώροι στις ίδιες συντεταγμένες: απλώνονται λίγα μέτρα γύρω από το σημείο,
+  // ώστε να φαίνονται ως ξεχωριστές πινέζες όταν ζουμάρεις
+  const keys = [...group(shown, 'key').keys()];
+  const spot = k => k.split('|')[0];
+  const offset = new Map();
+  group(keys.map(k => ({ k, s: spot(k) })), 's').forEach(same => {
+    same.forEach((o, i) => {
+      const a = 2 * Math.PI * i / same.length, d = same.length > 1 ? 0.00028 : 0;
+      offset.set(o.k, [d * Math.sin(a), d * Math.cos(a) * 1.27]);
+    });
+  });
   group(shown, 'key').forEach((list, key) => {
-    const m = L.marker([list[0].lat, list[0].lon], { title: placeName(list) }).bindPopup(popupHTML(list), { maxHeight: popupMax, minWidth: 200, maxWidth: Math.min(300, map.getSize().x - 84), autoPanPadding: [12, 12] });
+    const [dy, dx] = offset.get(key) || [0, 0];
+    const m = L.marker([list[0].lat + dy, list[0].lon + dx], { title: placeName(list) }).bindPopup(popupHTML(list), { maxHeight: popupMax, minWidth: 200, maxWidth: Math.min(300, map.getSize().x - 84), autoPanPadding: [12, 12] });
     markers.set(key, m);
     cluster.addLayer(m);
   });
