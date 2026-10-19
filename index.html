@@ -16,11 +16,49 @@
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
-  body { font: 15px/1.45 "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--side); display: flex; }
+  body { font: 15px/1.45 "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: var(--side); display: flex; flex-direction: column; }
+  /* Κεντρικό μενού */
+  .topbar { flex: none; display: flex; align-items: center; gap: 18px; padding: 10px 18px; background: var(--card); border-bottom: 1px solid var(--line); z-index: 600; }
+  .topbar .brand { color: inherit; text-decoration: none; margin: 0; flex: 0 1 auto; min-width: 0; }
+  .tabs { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--side); margin-left: auto; }
+  .tabs a { display: inline-flex; align-items: center; gap: 7px; padding: 7px 14px; border-radius: 9px; font-size: 14px; font-weight: 700; color: var(--muted); text-decoration: none; transition: background .15s, color .15s; }
+  .tabs a svg { width: 16px; height: 16px; }
+  .tabs a:hover { color: var(--ink); }
+  .tabs a[aria-current="page"] { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(20,35,45,.12); }
+  .tabs a:focus-visible, .brand:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #app { flex: 1; min-height: 0; display: flex; }
+  .view { flex: 1; min-width: 0; min-height: 0; display: flex; }
+  .view[hidden] { display: none; }
+  /* Ευρετήριο */
+  #view-dir { flex-direction: column; overflow-y: auto; }
+  .dir-head { max-width: 1120px; width: 100%; margin: 0 auto; padding: 26px 22px 6px; }
+  .dir-head h2 { font-size: 24px; font-weight: 800; letter-spacing: -.01em; margin: 0 0 4px; }
+  .dir-head p { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
+  .dir-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .dir-tools .search { flex: 1 1 280px; }
+  .dir-tools input, .dir-tools select { width: 100%; padding: 11px 12px 11px 38px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font: inherit; color: inherit; }
+  .dir-tools select { flex: 0 1 240px; width: auto; padding-left: 12px; }
+  .dir-tools input:focus, .dir-tools select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  #dcount { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-top: 16px; }
+  #dir { max-width: 1120px; width: 100%; margin: 0 auto; padding: 4px 22px 30px; flex: 1; }
+  .dgroup h3 { font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); margin: 22px 0 10px; display: flex; align-items: center; gap: 6px; }
+  .dgroup h3 svg { width: 14px; height: 14px; }
+  .dgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .dcard { display: flex; gap: 12px; text-align: left; width: 100%; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
+  .dcard:hover { border-color: #cbd8de; box-shadow: 0 2px 4px rgba(20,35,45,.07), 0 8px 22px rgba(20,35,45,.08); transform: translateY(-1px); }
+  .dcard:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .dcard .name { font-size: 15px; line-height: 1.3; }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 2px 8px 2px 7px; border-radius: 999px; background: var(--side); border: 1px solid var(--line); }
+  .tag .dot { width: 7px; height: 7px; }
+  .noacts { margin-top: 8px; font-size: 12.5px; color: var(--muted); font-style: italic; }
+  .dempty { padding: 40px 0; text-align: center; color: var(--muted); }
+  #view-dir footer { border-top: 1px solid var(--line); }
+  #view-dir footer > div, #view-dir footer > a { max-width: 1076px; margin-left: auto; margin-right: auto; display: block; }
   button, input { font: inherit; color: inherit; }
   aside { width: 390px; max-width: 100%; display: flex; flex-direction: column; background: var(--side); border-right: 1px solid var(--line); box-shadow: 4px 0 24px rgba(20,35,45,.08); z-index: 500; }
-  header { padding: 20px 18px 14px; background: var(--card); border-bottom: 1px solid var(--line); }
-  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  aside header { padding: 16px 18px 14px; background: var(--card); border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 12px; }
   .brand svg { width: 40px; height: 40px; flex: none; padding: 9px; border-radius: 12px; color: #fff; background: linear-gradient(140deg, #1389ad, var(--accent-ink)); }
   h1 { font-size: 18px; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; margin: 0; }
   .tagline { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
@@ -82,9 +120,8 @@
   .contact small { display: block; font-size: 12px; color: var(--muted); }
   .contact b { font-weight: 600; overflow-wrap: anywhere; }
   #profile .acts { border-top: 0; padding-top: 0; margin-top: 0; margin-bottom: -6px; }
-  body.in-profile .search, body.in-profile #chips, body.in-profile #count, body.in-profile #list { display: none; }
-  body.in-profile .brand { margin-bottom: 0; }
-  .brand > div { flex: 1; min-width: 0; }
+  body.in-profile aside header, body.in-profile #list { display: none; }
+  .brand > div { min-width: 0; }
   .add { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; color: var(--accent); background: var(--accent-soft); transition: background .15s, color .15s; }
   .add svg { width: 18px; height: 18px; padding: 0; background: none; color: inherit; border-radius: 0; }
   .add:hover, .add:focus-visible { background: var(--accent); color: #fff; outline: none; }
@@ -101,11 +138,19 @@
   .leaflet-popup-content-wrapper { border-radius: 14px; box-shadow: 0 6px 28px rgba(20,35,45,.2); }
   .leaflet-popup-content { font-size: 14px; line-height: 1.4; margin: 14px 16px; }
   @media (max-width: 760px) {
-    body { flex-direction: column-reverse; }
+    #view-map { flex-direction: column-reverse; }
     aside { width: 100%; height: 60%; border-right: 0; border-top: 1px solid var(--line); box-shadow: 0 -4px 24px rgba(20,35,45,.1); }
     #map { flex: none; height: 40%; }
-    header { padding: 10px 14px 8px; }
-    .brand { gap: 10px; margin-bottom: 8px; }
+    aside header { padding: 10px 14px 8px; }
+    .topbar { gap: 10px; padding: 8px 12px; }
+    .tabs a { padding: 6px 11px; font-size: 13.5px; }
+    .tabs a svg { display: none; }
+    .brand { gap: 10px; }
+    .dir-head { padding: 18px 14px 4px; }
+    .dir-head h2 { font-size: 20px; }
+    .dir-tools select { flex: 1 1 100%; }
+    #dir { padding: 4px 14px 24px; }
+    .dgrid { grid-template-columns: 1fr; gap: 8px; }
     .brand svg { width: 30px; height: 30px; padding: 7px; border-radius: 9px; }
     h1 { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .tagline { display: none; }
@@ -124,17 +169,26 @@
     #chips { flex-wrap: nowrap; overflow-x: auto; margin-right: -14px; padding-right: 14px; scrollbar-width: none; }
     .chip { flex: none; }
   }
+  @media (max-width: 520px) { .topbar h1 { display: none; } }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<aside>
-  <header>
-    <div class="brand">
+<nav class="topbar" aria-label="Κεντρικό μενού">
+  <a class="brand" href="#/" aria-label="Αρχική: χάρτης">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.900 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg>
       <div><h1>Πολιτιστικοί Σύλλογοι Χίου</h1><div class="tagline">Δραστηριότητες ανά σύλλογο και χώρο</div></div>
-      <a class="add" data-add href="#" title="Πρόσθεσε τον σύλλογό σου" aria-label="Πρόσθεσε τον σύλλογό σου"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
-    </div>
+  </a>
+  <div class="tabs">
+    <a href="#/" data-view="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Χάρτης</a>
+    <a href="#/syllogoi" data-view="dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Σύλλογοι</a>
+  </div>
+  <a class="add" data-add href="#" title="Πρόσθεσε τον σύλλογό σου" aria-label="Πρόσθεσε τον σύλλογό σου"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
+</nav>
+<main id="app">
+<div id="view-map" class="view">
+<aside>
+  <header>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.500-3.500"/></svg>
       <input id="q" type="search" placeholder="Αναζήτηση συλλόγου, χωριού ή χώρου" aria-label="Αναζήτηση συλλόγου, χωριού ή χώρου">
@@ -147,11 +201,33 @@
   <section id="profile" hidden aria-live="polite"></section>
   <footer>
     <a class="cta" data-add href="#">Πρόσθεσε τον σύλλογό σου</a>
-    <div>Τα στοιχεία δίνονται από τους συλλόγους και μπορεί να αλλάξουν.<span id="updated"></span></div>
+    <div>Τα στοιχεία δίνονται από τους συλλόγους και μπορεί να αλλάξουν.<span class="updated"></span></div>
     <div>Διαχείριση: Homeric Code · <a href="mailto:homericcode@gmail.com">homericcode@gmail.com</a> · <a href="privacy.html">Προστασία δεδομένων</a></div>
   </footer>
 </aside>
 <div id="map"></div>
+</div>
+<div id="view-dir" class="view" hidden>
+  <div class="dir-head">
+    <h2>Ευρετήριο συλλόγων</h2>
+    <p>Όλοι οι πολιτιστικοί σύλλογοι του νησιού, ανά χωριό. Πάτησε έναν σύλλογο για τα στοιχεία και το πρόγραμμά του.</p>
+    <div class="dir-tools">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="dq" type="search" placeholder="Αναζήτηση συλλόγου, χωριού ή δραστηριότητας" aria-label="Αναζήτηση συλλόγου, χωριού ή δραστηριότητας">
+      </div>
+      <select id="dv" aria-label="Φίλτρο ανά χωριό"><option value="">Όλα τα χωριά</option></select>
+    </div>
+    <div id="dcount"></div>
+  </div>
+  <div id="dir"></div>
+  <footer>
+    <a class="cta" data-add href="#">Πρόσθεσε τον σύλλογό σου</a>
+    <div>Τα στοιχεία δίνονται από τους συλλόγους και μπορεί να αλλάξουν.<span class="updated"></span></div>
+    <div>Διαχείριση: Homeric Code · <a href="mailto:homericcode@gmail.com">homericcode@gmail.com</a> · <a href="privacy.html">Προστασία δεδομένων</a></div>
+  </footer>
+</div>
+</main>
 
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/leaflet.markercluster.js"></script>
@@ -164,8 +240,9 @@
    Μία γραμμή ανά δραστηριότητα. Οι συντεταγμένες είναι του χώρου όπου γίνεται
    η δραστηριότητα· ίδιες συντεταγμένες = ένα σημείο στον χάρτη. */
 const DATA_URL = 'data.csv';
-/* Προφίλ συλλόγων: syllogoi.csv, μία γραμμή ανά σύλλογο.
-   Στήλες: σύλλογος, logo, url, social, email, τηλέφωνο, περιγραφή
+/* Προφίλ συλλόγων: syllogoi.csv, μία γραμμή ανά σύλλογο. Εδώ μπαίνουν και σύλλογοι
+   χωρίς πρόγραμμα: εμφανίζονται στο ευρετήριο, χωρίς πινέζα στον χάρτη.
+   Στήλες: σύλλογος, χωριό, logo, url, social, email, τηλέφωνο, περιγραφή
    logo = όνομα αρχείου εικόνας μέσα στον φάκελο logos/ (π.χ. pyrgi.png) (όλες προαιρετικές εκτός από το όνομα).
    Το όνομα πρέπει να είναι γραμμένο ακριβώς όπως στο data.csv. */
 const PROFILES_URL = 'syllogoi.csv';
@@ -245,7 +322,7 @@ fetch('chios.geojson').then(r => r.json()).then(g => {
 }).catch(() => {});
 const cluster = L.markerClusterGroup({ maxClusterRadius: 40, removeOutsideVisibleBounds: false }).addTo(map);
 
-let rows = [], active = new Set(), profiles = new Map(), current = null;
+let rows = [], active = new Set(), profiles = new Map(), current = null, view = 'map', from = 'map';
 // Ένα χρώμα ανά δραστηριότητα, ίδιο στα φίλτρα και στις λίστες
 const PALETTE = ['#0b6e8f', '#c2553a', '#5b8c3e', '#8a5fb5', '#c9962b', '#2f9c95', '#b54d7e', '#566b8c'];
 let actNames = [];
@@ -357,8 +434,8 @@ function renderProfile(acts, actItem) {
   });
   if (p.email) contact.push(row('mailto:' + p.email, 'mail', 'Email', p.email));
   if (p.phone) contact.push(row('tel:' + p.phone.replace(/[^+\d]/g, ''), 'phone', 'Τηλέφωνο', p.phone));
-  const villages = [...new Set(acts.map(r => r.village).filter(Boolean))].join(', ');
-  el.innerHTML = `<button type="button" id="back"><span aria-hidden="true">←</span> Όλοι οι σύλλογοι</button>
+  const villages = p.village || [...new Set(acts.map(r => r.village).filter(Boolean))].join(', ');
+  el.innerHTML = `<button type="button" id="back"><span aria-hidden="true">←</span> ${from === 'dir' ? 'Ευρετήριο συλλόγων' : 'Όλοι οι σύλλογοι'}</button>
     <div class="pcard"><div class="chead">${avatar(current, true)}<div class="cmain"><h2>${esc(current)}</h2>${pinLine(villages)}</div></div>${p.about ? `<p>${esc(p.about)}</p>` : ''}</div>
     <div class="pcard"><h3>Επικοινωνία</h3>
     ${contact.length ? `<ul class="contact">${contact.join('')}</ul>` : '<div class="village">Δεν έχουν καταχωριστεί στοιχεία επικοινωνίας.</div>'}</div>
@@ -366,19 +443,30 @@ function renderProfile(acts, actItem) {
   const ul = document.createElement('ul');
   ul.className = 'acts';
   groupActs(acts).forEach(g => ul.appendChild(actItem(g)));
-  $('pacts').appendChild(ul);
+  if (acts.length) $('pacts').appendChild(ul);
+  else $('pacts').insertAdjacentHTML('beforeend', '<div class="village">Ο σύλλογος δεν έχει καταχωρίσει πρόγραμμα δραστηριοτήτων.</div>');
   el.scrollTop = 0;
-  $('back').addEventListener('click', () => { location.hash = ''; });
+  $('back').addEventListener('click', () => { location.hash = from === 'dir' ? '#/syllogoi' : '#/'; });
   const b = L.latLngBounds(acts.map(r => [r.lat, r.lon]));
-  if (b.isValid()) map.fitBounds(b.pad(0.5), { maxZoom: 14 });
+  if (b.isValid()) map.fitBounds(b.pad(0.5), { maxZoom: 14 }); else map.fitBounds(CHIOS);
 }
 
-// Το προφίλ έχει δικό του σύνδεσμο (#s=όνομα), ώστε να μοιράζεται και να δουλεύει το «πίσω» του browser
+// Διευθύνσεις: #/ = χάρτης, #/syllogoi = ευρετήριο, #s=όνομα = προφίλ συλλόγου
+// (κάθε σελίδα έχει δικό της σύνδεσμο, ώστε να μοιράζεται και να δουλεύει το «πίσω» του browser)
+const allClubs = () => [...new Set([...profiles.keys(), ...rows.map(r => r.club)])];
 function route() {
   let name = null;
   try { name = decodeURIComponent((location.hash.match(/^#s=(.+)$/) || [])[1] || '') || null; } catch (e) {}
   const was = current;
-  current = name && rows.some(r => r.club === name) ? name : null;
+  current = name && allClubs().includes(name) ? name : null;
+  const next = current ? 'map' : (location.hash.startsWith('#/syllogoi') ? 'dir' : 'map');
+  if (!current) from = next;
+  view = next;
+  $('view-map').hidden = view !== 'map';
+  $('view-dir').hidden = view !== 'dir';
+  document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.view === (current ? from : view)) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  if (view === 'dir') { renderDir(); return; }
+  map.invalidateSize();
   map.closePopup();
   render();
   if (was && !current) map.fitBounds(CHIOS);
@@ -386,21 +474,62 @@ function route() {
 window.addEventListener('hashchange', route);
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-club]');
-  if (b) location.hash = 's=' + encodeURIComponent(b.dataset.club);
+  if (b) { e.preventDefault(); location.hash = 's=' + encodeURIComponent(b.dataset.club); }
 });
 
 function buildProfiles(table) {
   const head = table[0].map(norm);
   const col = name => head.indexOf(norm(name));
-  const ix = { club: col('σύλλογος'), logo: col('logo'), url: col('url'), social: col('social'), email: col('email'), phone: col('τηλέφωνο'), about: col('περιγραφή') };
+  const ix = { club: col('σύλλογος'), village: col('χωριό'), logo: col('logo'), url: col('url'), social: col('social'), email: col('email'), phone: col('τηλέφωνο'), about: col('περιγραφή') };
   const out = new Map();
   if (ix.club < 0) return out;
   table.slice(1).forEach(r => {
     const get = k => ix[k] < 0 ? '' : (r[ix[k]] || '').trim();
-    if (get('club')) out.set(get('club'), { logo: get('logo'), url: get('url'), social: get('social'), email: get('email'), phone: get('phone'), about: get('about') });
+    if (get('club')) out.set(get('club'), { village: get('village'), logo: get('logo'), url: get('url'), social: get('social'), email: get('email'), phone: get('phone'), about: get('about') });
   });
   return out;
 }
+
+function clubInfo(club) {
+  const p = profiles.get(club) || {};
+  const own = rows.filter(r => r.club === club);
+  const village = p.village || [...new Set(own.map(r => r.village).filter(Boolean))].join(', ');
+  const acts = [...new Set(own.map(r => r.act).filter(Boolean))].sort(byClub);
+  return { club, village, acts };
+}
+
+function renderDir() {
+  const q = norm($('dq').value), v = $('dv').value;
+  const list = allClubs().map(clubInfo).filter(c =>
+    (!v || c.village.split(', ').includes(v)) &&
+    (!q || [c.club, c.village, ...c.acts].some(x => norm(x).includes(q))));
+  const byVillage = group(list.map(c => ({ ...c, g: c.village.split(', ')[0] || 'Χωρίς χωριό' })), 'g');
+  const el = $('dir');
+  el.innerHTML = '';
+  [...byVillage].sort((a, b) => byClub(a[0], b[0])).forEach(([vill, clubs]) => {
+    const sec = document.createElement('section');
+    sec.className = 'dgroup';
+    sec.innerHTML = `<h3>${icon(ICONS.pin)}${esc(vill)}</h3><div class="dgrid"></div>`;
+    clubs.sort((a, b) => byClub(a.club, b.club)).forEach(c => {
+      const shownActs = c.acts.slice(0, 5);
+      const tags = c.acts.length
+        ? `<div class="tags">${shownActs.map(a => `<span class="tag">${dot(a)}${esc(a)}</span>`).join('')}${c.acts.length > 5 ? `<span class="tag">+${c.acts.length - 5}</span>` : ''}</div>`
+        : '<div class="noacts">Χωρίς καταχωρισμένο πρόγραμμα</div>';
+      sec.querySelector('.dgrid').insertAdjacentHTML('beforeend',
+        `<button type="button" class="dcard" data-club="${esc(c.club)}">${avatar(c.club)}<span class="cmain"><span class="name">${esc(c.club)}</span>${pinLine(c.village)}${tags}</span></button>`);
+    });
+    el.appendChild(sec);
+  });
+  if (!list.length) el.innerHTML = '<div class="dempty">Δεν βρέθηκαν σύλλογοι με αυτά τα κριτήρια.</div>';
+  $('dcount').textContent = list.length === 1 ? '1 σύλλογος' : list.length + ' σύλλογοι';
+}
+
+function fillVillages() {
+  const vs = [...new Set(allClubs().flatMap(c => clubInfo(c).village.split(', ')).filter(Boolean))].sort(byClub);
+  $('dv').insertAdjacentHTML('beforeend', vs.map(v => `<option>${esc(v)}</option>`).join(''));
+}
+$('dq').addEventListener('input', renderDir);
+$('dv').addEventListener('change', renderDir);
 
 function renderChips() {
   const acts = actNames = [...new Set(rows.map(r => r.act).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'el'));
@@ -423,10 +552,11 @@ $('q').addEventListener('input', render);
 // «Πρόσθεσε τον σύλλογό σου»: ανοίγει email με έτοιμο το τι στοιχεία χρειάζονται
 const ADD_BODY = `Καλησπέρα,
 
-θα θέλαμε να προστεθεί ο σύλλογός μας στον χάρτη.
+θα θέλαμε να προστεθεί ο σύλλογός μας στον χάρτη και στο ευρετήριο συλλόγων.
 
 ΣΤΟΙΧΕΙΑ ΣΥΛΛΟΓΟΥ
 Επωνυμία:
+Χωριό ή περιοχή:
 Λογότυπο: (επισυνάψτε το ως εικόνα, αν υπάρχει)
 Ιστοσελίδα:
 Social media (Facebook, Instagram κ.λπ.):
@@ -434,7 +564,7 @@ Email επικοινωνίας:
 Τηλέφωνο επικοινωνίας:
 Σύντομη περιγραφή (προαιρετικά):
 
-ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ (επαναλάβετε για καθεμία)
+ΔΡΑΣΤΗΡΙΟΤΗΤΕΣ (αν υπάρχουν· επαναλάβετε για καθεμία)
 Είδος:
 Μέρες και ώρες:
 Όνομα χώρου:
@@ -450,7 +580,7 @@ fetch(DATA_URL, { cache: 'no-store' })
   .then(r => {
     if (!r.ok) throw new Error('Δεν βρέθηκε το αρχείο δεδομένων (' + r.status + ').');
     const d = new Date(r.headers.get('Last-Modified') || '');
-    if (!isNaN(d)) $('updated').textContent = ' Τελευταία ενημέρωση: ' + d.toLocaleDateString('el-GR') + '.';
+    if (!isNaN(d)) document.querySelectorAll('.updated').forEach(u => u.textContent = ' Τελευταία ενημέρωση: ' + d.toLocaleDateString('el-GR') + '.');
     return r.text();
   })
   .then(t => {
@@ -459,7 +589,7 @@ fetch(DATA_URL, { cache: 'no-store' })
     return fetch(PROFILES_URL, { cache: 'no-store' }).then(r => r.ok ? r.text() : '').catch(() => '')
       .then(p => { if (p.trim()) profiles = buildProfiles(parseCSV(p)); });
   })
-  .then(() => { renderChips(); route(); })
+  .then(() => { renderChips(); fillVillages(); route(); })
   .catch(e => { $('msg').hidden = false; $('msg').textContent = 'Τα δεδομένα δεν φορτώθηκαν. ' + e.message; });
 </script>
 </body>
