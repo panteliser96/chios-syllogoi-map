@@ -30,22 +30,57 @@
   .view { flex: 1; min-width: 0; min-height: 0; display: flex; }
   .view[hidden] { display: none; }
   /* Αρχική */
-  #view-home { flex-direction: column; overflow-y: auto; background: var(--card); }
-  .home { flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 760px; width: 100%; margin: 0 auto; padding: 48px 22px; }
-  .home h2 { font-size: 34px; line-height: 1.15; font-weight: 800; letter-spacing: -.02em; margin: 0 0 14px; }
-  .home p { font-size: 17px; line-height: 1.6; color: var(--muted); margin: 0 0 12px; }
-  .home p a { color: var(--accent); font-weight: 700; text-decoration: none; }
-  .home p a:hover { text-decoration: underline; }
-  .stats { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); margin: 0 0 18px; min-height: 1em; }
-  .go { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
-  .go a { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); color: var(--ink); text-decoration: none; transition: border-color .15s, box-shadow .15s, transform .15s; }
-  .go a:hover { border-color: #cbd8de; box-shadow: 0 2px 4px rgba(20,35,45,.07), 0 8px 22px rgba(20,35,45,.08); transform: translateY(-1px); }
-  .go a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .go svg { width: 44px; height: 44px; flex: none; padding: 11px; border-radius: 12px; color: var(--accent); background: var(--accent-soft); }
-  .go a.primary svg { color: #fff; background: linear-gradient(140deg, #1389ad, var(--accent-ink)); }
-  .go b { display: block; font-size: 16px; }
-  .go small { display: block; font-size: 13px; color: var(--muted); }
-  #view-home footer > div, #view-home footer > a { max-width: 716px; margin-left: auto; margin-right: auto; display: block; }
+  #view-home { flex-direction: column; overflow-y: auto; background: var(--side); }
+  .home { max-width: 1120px; width: 100%; margin: 0 auto; padding: 28px 22px 40px; display: flex; flex-direction: column; gap: 22px; }
+  .hero { position: relative; overflow: hidden; display: grid; grid-template-columns: 1.15fr .85fr; align-items: center; gap: 24px; padding: 40px 48px; border-radius: 24px; color: #fff;
+    background: radial-gradient(120% 140% at 100% 0%, #1c9cc2 0%, rgba(28,156,194,0) 55%), linear-gradient(140deg, #0e7da1 0%, var(--accent-ink) 60%, #073d50 100%); box-shadow: 0 10px 40px rgba(8,79,103,.25); }
+  .hero::after { content: ""; position: absolute; inset: auto -10% -60% auto; width: 520px; height: 520px; border-radius: 50%; background: radial-gradient(circle, rgba(255,255,255,.10), rgba(255,255,255,0) 70%); pointer-events: none; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2); }
+  .hero h2 { font-size: 40px; line-height: 1.1; font-weight: 800; letter-spacing: -.025em; margin: 16px 0 14px; }
+  .hero p { font-size: 17px; line-height: 1.6; margin: 0; color: rgba(255,255,255,.86); max-width: 520px; }
+  .hero .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+  .btn { display: inline-flex; align-items: center; gap: 9px; padding: 13px 20px; border-radius: 12px; font-weight: 800; font-size: 15px; text-decoration: none; transition: transform .15s, box-shadow .15s, background .15s; }
+  .btn svg { width: 18px; height: 18px; }
+  .btn.light { background: #fff; color: var(--accent-ink); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+  .btn.ghost { color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.35); }
+  .btn:hover { transform: translateY(-1px); }
+  .btn.ghost:hover { background: rgba(255,255,255,.2); }
+  .btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .island { position: relative; z-index: 1; display: block; justify-self: center; width: 100%; max-width: 230px; }
+  .island svg { display: block; width: 100%; height: auto; overflow: visible; filter: drop-shadow(0 10px 24px rgba(0,0,0,.25)); }
+  .island .land { fill: rgba(255,255,255,.95); }
+  .island .spot { fill: #f2a541; stroke: #fff; stroke-width: 1.5; }
+  .island .ring { fill: none; stroke: #f2a541; stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: ping 2.4s ease-out infinite; }
+  .island:hover .land { fill: #fff; }
+  @keyframes ping { 0% { transform: scale(1); opacity: .9; } 100% { transform: scale(3.2); opacity: 0; } }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .stat { padding: 18px 20px; background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 14px; }
+  .stat svg { width: 42px; height: 42px; flex: none; padding: 10px; border-radius: 12px; color: var(--accent); background: var(--accent-soft); }
+  .stat b { display: block; font-size: 28px; line-height: 1; font-weight: 800; letter-spacing: -.02em; }
+  .stat span { font-size: 13.5px; color: var(--muted); }
+  .block { padding: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); }
+  .block h3 { font-size: 19px; font-weight: 800; letter-spacing: -.01em; margin: 0 0 4px; }
+  .block .sub { font-size: 14px; color: var(--muted); margin: 0 0 16px; }
+  .bhead { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+  .bhead a { flex: none; font-size: 14px; font-weight: 700; color: var(--accent); text-decoration: none; margin-bottom: 16px; }
+  .bhead a:hover { text-decoration: underline; }
+  #hacts { display: flex; flex-wrap: wrap; gap: 8px; }
+  #hacts .chip { font-size: 14px; padding: 8px 14px 8px 12px; }
+  #hacts .chip:hover { border-color: var(--c); background: #fff; transform: translateY(-1px); }
+  #hclubs { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .hclub { display: flex; align-items: center; gap: 12px; padding: 12px; text-align: left; background: var(--side); border: 1px solid transparent; border-radius: 14px; cursor: pointer; transition: background .15s, border-color .15s; }
+  .hclub:hover { background: #fff; border-color: var(--line); box-shadow: var(--shadow); }
+  .hclub:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .hclub .name { font-size: 14px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .hclub .village { font-size: 12.5px; margin-top: 2px; }
+  .invite { display: flex; align-items: center; gap: 18px; padding: 22px 24px; border-radius: 20px; background: linear-gradient(120deg, #fff6e8, #fdebd0); border: 1px solid #f3dcb5; }
+  .invite svg { width: 48px; height: 48px; flex: none; padding: 12px; border-radius: 14px; color: #fff; background: #e08e1f; }
+  .invite div { flex: 1; min-width: 0; }
+  .invite b { display: block; font-size: 17px; }
+  .invite span { font-size: 14px; color: #6e5a3a; }
+  .invite a { flex: none; padding: 11px 18px; border-radius: 12px; background: #e08e1f; color: #fff; font-weight: 800; text-decoration: none; transition: background .15s; }
+  .invite a:hover { background: #c47812; }
+  #view-home > footer > div, #view-home > footer > a { max-width: 1076px; margin-left: auto; margin-right: auto; display: block; }
   /* Ευρετήριο */
   #view-dir { flex-direction: column; overflow-y: auto; }
   .dir-head { max-width: 1480px; width: 100%; margin: 0 auto; padding: 26px 22px 6px; }
@@ -170,10 +205,22 @@
     .tabs a { padding: 6px 11px; font-size: 13.5px; }
     .tabs a svg { display: none; }
     .brand { gap: 10px; }
-    .home { padding: 28px 16px; justify-content: flex-start; }
-    .home h2 { font-size: 26px; }
-    .home p { font-size: 15.5px; }
-    .go { grid-template-columns: 1fr; gap: 10px; }
+    .home { padding: 14px 12px 28px; gap: 14px; }
+    .hero { grid-template-columns: 1fr; padding: 28px 22px 26px; border-radius: 20px; gap: 6px; }
+    .hero h2 { font-size: 28px; margin-top: 12px; }
+    .hero p { font-size: 15.5px; }
+    .hero .btns { margin-top: 20px; }
+    .btn { flex: 1 1 auto; justify-content: center; }
+    .island { display: none; }
+    .stats { gap: 8px; }
+    .stat { flex-direction: column; align-items: flex-start; gap: 8px; padding: 14px; }
+    .stat svg { width: 34px; height: 34px; padding: 8px; }
+    .stat b { font-size: 22px; }
+    .stat span { font-size: 12px; }
+    .block { padding: 18px 16px; border-radius: 16px; }
+    #hclubs { grid-template-columns: 1fr; }
+    .invite { flex-wrap: wrap; padding: 18px; }
+    .invite a { width: 100%; text-align: center; }
     .dir-head { padding: 18px 14px 4px; }
     .dir-head h2 { font-size: 20px; }
     .dir-tools select { flex: 1 1 100%; }
@@ -217,13 +264,36 @@
 <main id="app">
 <div id="view-home" class="view">
   <section class="home">
-    <h2>Οι πολιτιστικοί σύλλογοι της Χίου, σε ένα σημείο</h2>
-    <p>Βρες πού και πότε γίνονται μαθήματα χορού, χορωδίες, θέατρο, μουσική και άλλες δραστηριότητες σε όλο το νησί, μαζί με τα στοιχεία επικοινωνίας κάθε συλλόγου.</p>
-    <p>Τα στοιχεία τα δίνουν οι ίδιοι οι σύλλογοι. Λείπει ο δικός σου; <a data-add href="#">Πρόσθεσέ τον</a>.</p>
-    <div class="stats" id="stats"></div>
-    <div class="go">
-      <a class="primary" href="#/xartis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg><span><b>Χάρτης</b><small>Δραστηριότητες ανά χώρο</small></span></a>
-      <a href="#/syllogoi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg><span><b>Κατάλογος</b><small>Όλοι οι σύλλογοι με τα στοιχεία τους</small></span></a>
+    <div class="hero">
+      <div style="position:relative;z-index:1">
+        <span class="eyebrow">Χίος · Πολιτισμός · Κοινότητα</span>
+        <h2>Βρες τι γίνεται στον σύλλογο της γειτονιάς σου</h2>
+        <p>Χοροί, χορωδίες, θέατρο, μουσική, εργαστήρια και πολλά άλλα: όλες οι δραστηριότητες των πολιτιστικών συλλόγων της Χίου, με μέρες, ώρες και στοιχεία επικοινωνίας, σε ένα σημείο.</p>
+        <div class="btns">
+          <a class="btn light" href="#/xartis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Άνοιξε τον χάρτη</a>
+          <a class="btn ghost" href="#/syllogoi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Δες τον κατάλογο</a>
+        </div>
+      </div>
+      <a class="island" href="#/xartis" aria-label="Άνοιξε τον χάρτη" id="island"></a>
+    </div>
+    <div class="stats">
+      <div class="stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20a6.5 6.5 0 0 0-4-6"/></svg><div><b id="st-clubs">–</b><span>σύλλογοι</span></div></div>
+      <div class="stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><div><b id="st-villages">–</b><span>χωριά</span></div></div>
+      <div class="stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/></svg><div><b id="st-acts">–</b><span>δραστηριότητες</span></div></div>
+    </div>
+    <div class="block">
+      <h3>Τι σε ενδιαφέρει;</h3>
+      <p class="sub">Διάλεξε μια δραστηριότητα και δες στον χάρτη πού γίνεται.</p>
+      <div id="hacts"></div>
+    </div>
+    <div class="block">
+      <div class="bhead"><div><h3>Οι σύλλογοι</h3><p class="sub">Πάτησε έναν σύλλογο για το πρόγραμμα και τα στοιχεία του.</p></div><a href="#/syllogoi">Όλος ο κατάλογος →</a></div>
+      <div id="hclubs"></div>
+    </div>
+    <div class="invite">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      <div><b>Λείπει ο σύλλογός σου;</b><span>Στείλε μας τα στοιχεία του και θα τον προσθέσουμε στον χάρτη.</span></div>
+      <a data-add href="#">Πρόσθεσέ τον</a>
     </div>
   </section>
   <footer>
@@ -360,7 +430,9 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(map);
 // Μάσκα: καλύπτει ό,τι βρίσκεται έξω από το περίγραμμα της Χίου (chios.geojson, δεδομένα OpenStreetMap)
-fetch('chios.geojson').then(r => r.json()).then(g => {
+const geo = fetch('chios.geojson').then(r => r.json()).catch(() => null);
+geo.then(g => {
+  if (!g) return;
   const hole = g.geometry.coordinates[0].map(([lon, lat]) => [lat, lon]);
   L.polygon([[[20, 5], [20, 45], [55, 45], [55, 5]], hole],
     { stroke: true, color: '#7fa9b8', weight: 1, fillColor: '#aad3df', fillOpacity: 1, interactive: false }).addTo(map);
@@ -519,12 +591,45 @@ function showView(v, tab) {
   ['home', 'map', 'dir'].forEach(k => { $('view-' + k).hidden = v !== k; });
   document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.view === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
 }
-function renderStats() {
-  const clubs = allClubs().length;
-  if (!clubs) return;
-  const villages = new Set([...rows.map(r => r.village), ...[...profiles.values()].map(p => p.village)].filter(Boolean)).size;
-  const acts = new Set(rows.map(r => r.act).filter(Boolean)).size;
-  $('stats').textContent = [clubs + (clubs === 1 ? ' σύλλογος' : ' σύλλογοι'), villages + (villages === 1 ? ' χωριό' : ' χωριά'), acts + (acts === 1 ? ' δραστηριότητα' : ' δραστηριότητες')].join(' · ');
+let homeDone = false;
+function renderHome() {
+  const clubs = allClubs();
+  if (!clubs.length || homeDone) return;
+  homeDone = true;
+  const villageOf = c => (profiles.get(c) || {}).village || (rows.find(r => r.club === c) || {}).village || '';
+  $('st-clubs').textContent = clubs.length;
+  $('st-villages').textContent = new Set(clubs.map(villageOf).concat(rows.map(r => r.village)).filter(Boolean)).size;
+  $('st-acts').textContent = actNames.length;
+  $('hacts').innerHTML = '';
+  actNames.forEach((a, i) => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button'; b.innerHTML = dot(a) + esc(a);
+    b.style.setProperty('--c', PALETTE[i % PALETTE.length]);
+    b.addEventListener('click', () => {
+      active = new Set([a]);
+      document.querySelectorAll('#chips .chip').forEach(c => c.setAttribute('aria-pressed', String(c.textContent === a)));
+      location.hash = '#/xartis';
+    });
+    $('hacts').appendChild(b);
+  });
+  $('hclubs').innerHTML = clubs.sort(byClub).map(c => `<button type="button" class="hclub" data-club="${esc(c)}">${avatar(c)}<div><div class="name">${esc(c)}</div>${pinLine(villageOf(c))}</div></button>`).join('');
+  drawIsland();
+}
+// Σιλουέτα της Χίου με τους χώρους δραστηριοτήτων, από το chios.geojson
+function drawIsland() {
+  geo.then(g => {
+    if (!g) return;
+    const k = Math.cos(38.37 * Math.PI / 180), W = 200;
+    const ring = g.geometry.coordinates[0];
+    const xs = ring.map(c => c[0] * k), ys = ring.map(c => c[1]);
+    const x0 = Math.min(...xs), y1 = Math.max(...ys), s = W / (Math.max(...xs) - x0);
+    const H = (y1 - Math.min(...ys)) * s;
+    const P = (lon, lat) => [((lon * k - x0) * s).toFixed(1), ((y1 - lat) * s).toFixed(1)];
+    const d = 'M' + ring.map(c => P(c[0], c[1]).join(',')).join('L') + 'Z';
+    const spots = [...new Map(rows.map(r => [r.lat + ',' + r.lon, r])).values()];
+    $('island').innerHTML = `<svg viewBox="-6 -6 ${W + 12} ${(H + 12).toFixed(1)}" role="img" aria-label="Χάρτης της Χίου με τους χώρους δραστηριοτήτων"><path class="land" d="${d}"/>` +
+      spots.map((r, i) => { const [x, y] = P(r.lon, r.lat); return `<circle class="ring" cx="${x}" cy="${y}" r="4" style="animation-delay:${(i * .35).toFixed(2)}s"/><circle class="spot" cx="${x}" cy="${y}" r="4"/>`; }).join('') + '</svg>';
+  });
 }
 const allClubs = () => [...new Set([...profiles.keys(), ...rows.map(r => r.club)])];
 function route() {
@@ -536,7 +641,7 @@ function route() {
   if (!current && next !== 'home') from = next;
   view = next;
   showView(view, current ? from : view);
-  if (view === 'home') { renderStats(); return; }
+  if (view === 'home') { renderHome(); return; }
   if (view === 'dir') { renderDir(); return; }
   map.invalidateSize();
   map.closePopup();
