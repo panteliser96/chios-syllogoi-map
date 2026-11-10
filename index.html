@@ -491,7 +491,7 @@ function popupHTML(list) {
   let html = `<div class="name">${esc(name)}</div>` + (addr && addr !== name ? `<div class="village">${esc(addr)}</div>` : '');
   [...group(list, 'club')].sort((a, b) => byClub(a[0], b[0])).forEach(([club, acts]) => {
     html += `<button type="button" class="linkbtn club" data-club="${esc(club)}">${esc(club)}</button><ul class="acts">` +
-      groupActs(acts).map(g => `<li><b>${esc(g[0].act)}</b>${sessions(g, false)}</li>`).join('') + '</ul>';
+      (groupActs(acts).filter(g => g[0].act).map(g => `<li><b>${esc(g[0].act)}</b>${sessions(g, false)}</li>`).join('') || `<li><span class="when">Χωρίς καταχωρισμένο πρόγραμμα</span></li>`) + '</ul>';
   });
   return html;
 }
@@ -530,7 +530,7 @@ function render() {
     const a = document.createElement('li');
     a.tabIndex = 0;
     const place = [r.venue, r.address, current ? r.village : ''].filter(Boolean).join(', ');
-    a.innerHTML = `${dot(r.act)}<div><b>${esc(r.act)}</b>${sessions(g, true)}` + (place ? `<div class="place">${esc(place)}</div>` : '') + '</div>';
+    a.innerHTML = r.act ? `${dot(r.act)}<div><b>${esc(r.act)}</b>${sessions(g, true)}` : `<div><span class="when">Χωρίς καταχωρισμένο πρόγραμμα</span>` + (place ? `<div class="place">${esc(place)}</div>` : '') + '</div>';
     a.addEventListener('click', () => open(r.key));
     a.addEventListener('keydown', e => { if (e.key === 'Enter') open(r.key); });
     return a;
