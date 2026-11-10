@@ -29,6 +29,23 @@
   #app { flex: 1; min-height: 0; display: flex; }
   .view { flex: 1; min-width: 0; min-height: 0; display: flex; }
   .view[hidden] { display: none; }
+  /* Αρχική */
+  #view-home { flex-direction: column; overflow-y: auto; background: var(--card); }
+  .home { flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 760px; width: 100%; margin: 0 auto; padding: 48px 22px; }
+  .home h2 { font-size: 34px; line-height: 1.15; font-weight: 800; letter-spacing: -.02em; margin: 0 0 14px; }
+  .home p { font-size: 17px; line-height: 1.6; color: var(--muted); margin: 0 0 12px; }
+  .home p a { color: var(--accent); font-weight: 700; text-decoration: none; }
+  .home p a:hover { text-decoration: underline; }
+  .stats { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent-ink); margin: 0 0 18px; min-height: 1em; }
+  .go { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+  .go a { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); color: var(--ink); text-decoration: none; transition: border-color .15s, box-shadow .15s, transform .15s; }
+  .go a:hover { border-color: #cbd8de; box-shadow: 0 2px 4px rgba(20,35,45,.07), 0 8px 22px rgba(20,35,45,.08); transform: translateY(-1px); }
+  .go a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .go svg { width: 44px; height: 44px; flex: none; padding: 11px; border-radius: 12px; color: var(--accent); background: var(--accent-soft); }
+  .go a.primary svg { color: #fff; background: linear-gradient(140deg, #1389ad, var(--accent-ink)); }
+  .go b { display: block; font-size: 16px; }
+  .go small { display: block; font-size: 13px; color: var(--muted); }
+  #view-home footer > div, #view-home footer > a { max-width: 716px; margin-left: auto; margin-right: auto; display: block; }
   /* Ευρετήριο */
   #view-dir { flex-direction: column; overflow-y: auto; }
   .dir-head { max-width: 1480px; width: 100%; margin: 0 auto; padding: 26px 22px 6px; }
@@ -153,6 +170,10 @@
     .tabs a { padding: 6px 11px; font-size: 13.5px; }
     .tabs a svg { display: none; }
     .brand { gap: 10px; }
+    .home { padding: 28px 16px; justify-content: flex-start; }
+    .home h2 { font-size: 26px; }
+    .home p { font-size: 15.5px; }
+    .go { grid-template-columns: 1fr; gap: 10px; }
     .dir-head { padding: 18px 14px 4px; }
     .dir-head h2 { font-size: 20px; }
     .dir-tools select { flex: 1 1 100%; }
@@ -183,18 +204,34 @@
 </head>
 <body>
 <nav class="topbar" aria-label="Κεντρικό μενού">
-  <a class="brand" href="#/" aria-label="Αρχική: χάρτης">
+  <a class="brand" href="#/" aria-label="Αρχική σελίδα">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.900 12 21 12 21z"/><circle cx="12" cy="9.500" r="2.500"/></svg>
       <div><h1>Πολιτιστικοί Σύλλογοι Χίου</h1><div class="tagline">Δραστηριότητες ανά σύλλογο και χώρο</div></div>
   </a>
   <div class="tabs">
-    <a href="#/" data-view="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Χάρτης</a>
-    <a href="#/syllogoi" data-view="dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Σύλλογοι</a>
+    <a href="#/xartis" data-view="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg>Χάρτης</a>
+    <a href="#/syllogoi" data-view="dir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Κατάλογος</a>
   </div>
   <a class="add" data-add href="#" title="Πρόσθεσε τον σύλλογό σου" aria-label="Πρόσθεσε τον σύλλογό σου"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></a>
 </nav>
 <main id="app">
-<div id="view-map" class="view">
+<div id="view-home" class="view">
+  <section class="home">
+    <h2>Οι πολιτιστικοί σύλλογοι της Χίου, σε ένα σημείο</h2>
+    <p>Βρες πού και πότε γίνονται μαθήματα χορού, χορωδίες, θέατρο, μουσική και άλλες δραστηριότητες σε όλο το νησί, μαζί με τα στοιχεία επικοινωνίας κάθε συλλόγου.</p>
+    <p>Τα στοιχεία τα δίνουν οι ίδιοι οι σύλλογοι. Λείπει ο δικός σου; <a data-add href="#">Πρόσθεσέ τον</a>.</p>
+    <div class="stats" id="stats"></div>
+    <div class="go">
+      <a class="primary" href="#/xartis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/></svg><span><b>Χάρτης</b><small>Δραστηριότητες ανά χώρο</small></span></a>
+      <a href="#/syllogoi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16M4 12h16M4 19h10"/></svg><span><b>Κατάλογος</b><small>Όλοι οι σύλλογοι με τα στοιχεία τους</small></span></a>
+    </div>
+  </section>
+  <footer>
+    <div>Τα στοιχεία δίνονται από τους συλλόγους και μπορεί να αλλάξουν.<span class="updated"></span></div>
+    <div>Διαχείριση: Homeric Code · <a href="mailto:homericcode@gmail.com">homericcode@gmail.com</a> · <a href="privacy.html">Προστασία δεδομένων</a></div>
+  </footer>
+</div>
+<div id="view-map" class="view" hidden>
 <aside>
   <header>
     <div class="search">
@@ -470,25 +507,36 @@ function renderProfile(acts, actItem) {
   if (acts.length) $('pacts').appendChild(ul);
   else $('pacts').insertAdjacentHTML('beforeend', '<div class="village">Ο σύλλογος δεν έχει καταχωρίσει πρόγραμμα δραστηριοτήτων.</div>');
   el.scrollTop = 0;
-  $('back').addEventListener('click', () => { location.hash = from === 'dir' ? '#/syllogoi' : '#/'; });
+  $('back').addEventListener('click', () => { location.hash = from === 'dir' ? '#/syllogoi' : '#/xartis'; });
   const b = L.latLngBounds(acts.map(r => [r.lat, r.lon]));
   if (b.isValid()) map.fitBounds(b.pad(0.5), { maxZoom: 14 }); else map.fitBounds(CHIOS);
 }
 
-// Διευθύνσεις: #/ = χάρτης, #/syllogoi = ευρετήριο, #s=όνομα = προφίλ συλλόγου
+// Διευθύνσεις: #/ = αρχική, #/xartis = χάρτης, #/syllogoi = ευρετήριο, #s=όνομα = προφίλ συλλόγου
 // (κάθε σελίδα έχει δικό της σύνδεσμο, ώστε να μοιράζεται και να δουλεύει το «πίσω» του browser)
+const hashView = () => location.hash.startsWith('#/syllogoi') ? 'dir' : location.hash.startsWith('#/xartis') ? 'map' : location.hash.startsWith('#s=') ? 'map' : 'home';
+function showView(v, tab) {
+  ['home', 'map', 'dir'].forEach(k => { $('view-' + k).hidden = v !== k; });
+  document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.view === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+}
+function renderStats() {
+  const clubs = allClubs().length;
+  if (!clubs) return;
+  const villages = new Set([...rows.map(r => r.village), ...[...profiles.values()].map(p => p.village)].filter(Boolean)).size;
+  const acts = new Set(rows.map(r => r.act).filter(Boolean)).size;
+  $('stats').textContent = [clubs + (clubs === 1 ? ' σύλλογος' : ' σύλλογοι'), villages + (villages === 1 ? ' χωριό' : ' χωριά'), acts + (acts === 1 ? ' δραστηριότητα' : ' δραστηριότητες')].join(' · ');
+}
 const allClubs = () => [...new Set([...profiles.keys(), ...rows.map(r => r.club)])];
 function route() {
   let name = null;
   try { name = decodeURIComponent((location.hash.match(/^#s=(.+)$/) || [])[1] || '') || null; } catch (e) {}
   const was = current;
   current = name && allClubs().includes(name) ? name : null;
-  const next = current ? 'map' : (location.hash.startsWith('#/syllogoi') ? 'dir' : 'map');
-  if (!current) from = next;
+  const next = current ? 'map' : hashView();
+  if (!current && next !== 'home') from = next;
   view = next;
-  $('view-map').hidden = view !== 'map';
-  $('view-dir').hidden = view !== 'dir';
-  document.querySelectorAll('.tabs a').forEach(a => { if (a.dataset.view === (current ? from : view)) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  showView(view, current ? from : view);
+  if (view === 'home') { renderStats(); return; }
   if (view === 'dir') { renderDir(); return; }
   map.invalidateSize();
   map.closePopup();
@@ -593,6 +641,7 @@ document.querySelectorAll('[data-add]').forEach(a => {
   a.href = 'mailto:' + CONTACT_EMAIL + '?subject=' + encodeURIComponent('Καταχώριση συλλόγου στον χάρτη') + '&body=' + encodeURIComponent(ADD_BODY);
 });
 
+showView(hashView(), hashView());
 fetch(DATA_URL, { cache: 'no-store' })
   .then(r => {
     if (!r.ok) throw new Error('Δεν βρέθηκε το αρχείο δεδομένων (' + r.status + ').');
