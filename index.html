@@ -575,6 +575,19 @@ function renderProfile(acts, actItem) {
   const link = u => /^https?:\/\//i.test(u || '') ? u : (u && !/^[a-z][a-z0-9+.-]*:/i.test(u) ? 'https://' + u : '');
   const short = u => u.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, '');
   const url = link(p.url);
+  // Αναγνώσιμο κείμενο για συνδέσμους social (χωρίς %CE%.. κωδικοποίηση και αριθμητικά ids)
+  const socialText = u => {
+    let t = short(u); try { t = decodeURIComponent(t); } catch (e) {}
+    const path = t.replace(/^[^/]+\/?/, '');
+    if (/facebook\.com|fb\.com/i.test(t)) {
+      const m = path.match(/^p\/(.+)-\d{6,}\/?$/);
+      if (m) return m[1].replace(/-/g, ' ');
+      if (/^groups\//i.test(path)) return 'Ομάδα στο Facebook';
+      if (/^profile\.php/i.test(path)) return 'Σελίδα στο Facebook';
+    }
+    if (/instagram\.com/i.test(t) && /^[\w.]+\/?$/.test(path)) return '@' + path.replace(/\/$/, '');
+    return t;
+  };
   // Η στήλη social δέχεται έναν ή περισσότερους συνδέσμους, χωρισμένους με κενό ή ;
   const NETWORKS = [['facebook.com', 'Facebook'], ['fb.com', 'Facebook'], ['instagram.com', 'Instagram'], ['youtube.com', 'YouTube'], ['youtu.be', 'YouTube'], ['tiktok.com', 'TikTok'], ['x.com', 'X'], ['twitter.com', 'X']];
   const socials = (p.social || '').split(/[\s;]+/).map(link).filter(Boolean);
@@ -583,7 +596,7 @@ function renderProfile(acts, actItem) {
   if (url) contact.push(row(url, 'web', 'Ιστοσελίδα', short(url), true));
   socials.forEach(u => {
     const net = NETWORKS.find(([host]) => new RegExp('(^|\\.)' + host.replace('.', '\\.') + '$', 'i').test(short(u).split('/')[0]));
-    contact.push(row(u, 'social', net ? net[1] : 'Social media', short(u), true));
+    contact.push(row(u, 'social', net ? net[1] : 'Social media', socialText(u), true));
   });
   if (p.email) contact.push(row('mailto:' + p.email, 'mail', 'Email', p.email));
   if (p.phone) contact.push(row('tel:' + p.phone.replace(/[^+\d]/g, ''), 'phone', 'Τηλέφωνο', p.phone));
