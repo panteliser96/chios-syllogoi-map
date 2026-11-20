@@ -599,7 +599,8 @@ function renderProfile(acts, actItem) {
     contact.push(row(u, 'social', net ? net[1] : 'Social media', socialText(u), true));
   });
   if (p.email) contact.push(row('mailto:' + p.email, 'mail', 'Email', p.email));
-  if (p.phone) contact.push(row('tel:' + p.phone.replace(/[^+\d]/g, ''), 'phone', 'Τηλέφωνο', p.phone));
+  // Η στήλη τηλέφωνο δέχεται ένα ή περισσότερα τηλέφωνα, χωρισμένα με ;
+  (p.phone || '').split(/\s*;\s*/).filter(Boolean).forEach(ph => contact.push(row('tel:' + ph.replace(/\(.*?\)/g, '').replace(/[^+\d]/g, ''), 'phone', 'Τηλέφωνο', ph)));
   const villages = p.village || [...new Set(acts.map(r => r.village).filter(Boolean))].join(', ');
   el.innerHTML = `<button type="button" id="back"><span aria-hidden="true">←</span> ${from === 'dir' ? 'Ευρετήριο συλλόγων' : 'Όλοι οι σύλλογοι'}</button>
     <div class="pcard"><div class="chead">${avatar(current, true)}<div class="cmain"><h2>${esc(current)}</h2>${pinLine(villages)}</div></div>${p.about ? `<p>${esc(p.about)}</p>` : ''}</div>
